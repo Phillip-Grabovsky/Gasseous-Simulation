@@ -6,7 +6,8 @@ import javax.swing.JFrame;
 
 public class Main {
 
-	public static List<Point> board = new ArrayList<Point>(); //all chaps on the board.
+	public static int win = 0; //win: an int specifying the winner's color ID
+	public static List<Chap> board = new ArrayList<Chap>(); //all chaps on the board.
 	public static Event event; //contains up to 2 involved chaps and event type.
 
 	public static void main(String[] args) {
@@ -31,11 +32,11 @@ public class Main {
 			findNextEvent(time);
 			//we are guaranteed that nothing happens till t=nextEvent.
 			//move pieces assuming nothing collides until that time.
-			teamSwitch = animate(event.getTime(), team);
-			time = event.getTime();
+			teamSwitch = animate(event, team);
+			time = event.time;
 			handleEvent(event);
-			updateBoard();
-			allstop = checkStop();
+			//updateBoard();
+			allStop = checkStop();
 		}
 		//now, all the peices have stopped moving.
 		//figure out whose turn it is
@@ -58,8 +59,8 @@ public class Main {
 	    return true;
 	}
 
-	/*
-	public static double findNextEvent(double time) {
+
+	public static void findNextEvent(double time) {
 	    double smallest = -1; //-1 is the special character for "NO EVENT"
 
 	    //iterate over all predicted stops. find soonest one.
@@ -94,7 +95,6 @@ public class Main {
 
 	    //these loops have automatically populated the Event. time to animate!
 	}
-	*/
 
 	public static boolean animate(Event e, int color) {
 		boolean teamSwitch  = false;
@@ -106,19 +106,19 @@ public class Main {
 		return teamSwitch;
 	}
 
-	/*
-	public static handleEvent(event e) {
+
+	public static void handleEvent(Event e) {
 	    //resets velocities manually to [0,0] for stops,
 	    //  solves for velocities in a collision.
 	}
-	*/
 
-	/*
+
+
 	public static double collide(Chap a, Chap b, double time) {
 		//return time of collision between a and b.
 	   //this method requires some serious stuff.
 		//add calculated time to collision to current time t.
 	   return 0;
 	 }
-	 */
+
 }
