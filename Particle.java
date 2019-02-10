@@ -1,20 +1,11 @@
-import java.awt.event.MouseEvent;
-
-/*
-Chap Class
-- position
-- velocity
-- bool (on board)
-- color (could be an int value, denotes team)
-*/
-
-public class Chap {
+public class Particle {
 
   private double[] position = new double[2]; //position vector
   private double[] velocity = new double[2]; //velocity vector
   private boolean onBoard;
   private int team; //int so we could possibly have 2+ teams.
   private boolean isMoving;
+  private Event type1;
 
   public Chap(double[] pos, double[] vel, int team) {
     this.position = pos;
@@ -22,6 +13,9 @@ public class Chap {
     this.onBoard = true;
     this.isMoving = false;
     this.team = team;
+    this.type1.type = 1;
+    this.type1.p1 = this;
+
   }
 
   public void printInfo() {
