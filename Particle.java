@@ -6,6 +6,7 @@ public class Particle {
   private int team; //int so we could possibly have 2+ teams.
   private boolean isMoving;
   private Event type1;
+  private Event[] type2;
 
   public Chap(double[] pos, double[] vel, int team) {
     this.position = pos;
