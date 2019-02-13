@@ -123,23 +123,24 @@ public class Main {
 			 Space[i] = new Particle();
 		 }
 
-		 for(i=0; i<numberPoints; i++){
- 			wallList[i].type = 1;
-			wallList[i].p1 = Space[i]
- 		 }
- 		 for(i=0; i<numberPoints.length; i++){
+		 for(i=0; i<numberPoints.length; i++){
  		  	for(j=0; j<i.length; j++){
  			  	collideMatrix[i][j].type = 2;
 					collideMatrix[i][j].p1 = Space[i];
 					collideMatrix[i][j].p2 = Space[j];
-					//TODO: speedy structures here!
-					//each particle must get its entire i row, plus the all the events with
-					//	j values which are the same as its current i row #. maybe
-					//  knowing the order in which we add Particles helps? i.e. add the i row
-					//  immediately and then individually add events with the right j values
-					//   knowing the correct index within Space.
+					int whereToPut = (0.5*(i-2)*(i-1)) + j;
+					collideMatrix[i][j].p1.addType2(collideMatrix[i][j]);
+					collideMatrix[i][j].p2.addType2(collideMatrix[i][j]);
  			  }
  		 }
+
+		 for(i=0; i<numberPoints; i++){
+ 			wallList[i].type = 1;
+			wallList[i].p1 = Space[i];
+			Space[i].type1 = wallList[i];
+			Space[i].solidify();
+ 		 }
+
 
 	 }
 

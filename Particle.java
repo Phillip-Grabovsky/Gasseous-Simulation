@@ -1,12 +1,13 @@
 public class Particle {
 
-  private double[] position = new double[2]; //position vector
-  private double[] velocity = new double[2]; //velocity vector
+  private double[] position = new double[3]; //position vector
+  private double[] velocity = new double[3]; //velocity vector
   private boolean onBoard;
   private int team; //int so we could possibly have 2+ teams.
   private boolean isMoving;
   private Event type1;
   private Event[] type2;
+  private List<Event> type2liquid= new ArrayList<Event>();
 
   public Chap(double[] pos, double[] vel, int team) {
     this.position = pos;
@@ -32,6 +33,17 @@ public class Particle {
     //returns where it will be in t time units.
     double[] pos = {-1,-1};
     return pos;
+  }
+
+  public void addType2(Event e){
+    //add type 2 event to mutable array list
+    type2liquid.add(e);
+  }
+
+  public void solidify(){
+    //convert type2liquid arryalist to type2 Array. no longer mutable so structure
+    // is solid and cannot change!
+    type2 = new Event[type2liquid.size()];
   }
 
   public double nextWall(double time) { //tells when the chap will stop moving assuming no collisions.
