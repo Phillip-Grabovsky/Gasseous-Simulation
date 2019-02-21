@@ -329,9 +329,6 @@ public class Main {
 		 for(int i=0; i<numberPoints; i++){
  		  	for(int j=0; j<i; j++){
  			  	collideMatrix[i][j] = new Event(2, space.get(i), space.get(j) );
-					//collideMatrix[i][j].p1 = space.get(i);
-					//collideMatrix[i][j].p2 = space.get(j);
-					//int whereToPut = (int)Math.round((0.5*(i-2)*(i-1)) + j);
 					collideMatrix[i][j].p1.addType2(collideMatrix[i][j]);
 					collideMatrix[i][j].p2.addType2(collideMatrix[i][j]);
  			  }
