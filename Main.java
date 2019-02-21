@@ -255,6 +255,7 @@ public class Main {
 
 				p1.setAngularV( LC(omg1,lomg,e,Cejv,  1, -2/(ro+1), 2*Delomg/(ro+1), 1/(r*(ro+1)) ) );
 				p2.setAngularV( LC(omg2,lomg,e,Cejv,  1, -2/(ro+1), 2*Delomg/(ro+1), 1/(r*(ro+1)) ) );
+			}
 
 	}
 
