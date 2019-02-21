@@ -1,22 +1,32 @@
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Particle {
 
   private double[] position = new double[3]; //position vector
   private double[] velocity = new double[3]; //velocity vector
-  private boolean onBoard;
-  private int team; //int so we could possibly have 2+ teams.
-  private boolean isMoving;
-  private Event type1;
-  private Event[] type2;
+  private double[] angularV = new double[3]; //angular velocity vector.
+  public Event type1;
+  public Event[] type2;
   private List<Event> type2liquid= new ArrayList<Event>();
 
-  public Chap(double[] pos, double[] vel, int team) {
-    this.position = pos;
-    this.velocity = vel;
-    this.onBoard = true;
-    this.isMoving = false;
-    this.team = team;
+  public Particle(){
+    Random random = new Random();
+    this.position = new double[]{(random.nextDouble()*800)-400, (random.nextDouble()*800)-400, 0};
+    this.velocity = new double[]{(random.nextDouble()*800)-400, (random.nextDouble()*800)-400, 0};
+    this.angularV = new double[]{0,0,0};
+  }
+
+  public void FinishStructure(){
     this.type1.type = 1;
     this.type1.p1 = this;
+  }
+
+  public Particle(double[] pos, double[] vel, double[] angvel) {
+    this.position = pos;
+    this.velocity = vel;
+    this.angularV = angvel;
 
   }
 
@@ -24,15 +34,15 @@ public class Particle {
     System.out.println("---------------------------");
     System.out.println("pos: (" + position[0] + "," + position[1] + ")");
     System.out.println("vel: (" + velocity[0] + "," + velocity[1] + ")");
-    System.out.println("onBoard: " + onBoard);
-    System.out.println("team: " + team);
     System.out.println("---------------------------");
   }
 
   public double[] whereAt(double t){
     //returns where it will be in t time units.
-    double[] pos = {-1,-1};
-    return pos;
+    double[] p = position;
+    double[] v = velocity;
+
+    return new double[]{p[0]+v[0]*t, p[1]+v[1]*t, p[2]+v[2]*t};
   }
 
   public void addType2(Event e){
@@ -44,21 +54,17 @@ public class Particle {
     //convert type2liquid arryalist to type2 Array. no longer mutable so structure
     // is solid and cannot change!
     type2 = new Event[type2liquid.size()];
-  }
-
-  public double nextWall(double time) { //tells when the chap will stop moving assuming no collisions.
-    //TODO: MAKE SURE TO ADD the CURRENT TIME FROM PARAMETERS!
-    double[] zero = {0,0};
-    if(velocity == zero) {
-      return -1;
+    for(int i = 0; i<type2.length; i++){
+      type2[i] = type2liquid.get(i);
     }
-    return -1;
-    //TODO: MAKE SURE TO ADD the CURRENT TIME FROM PARAMETERS!
   }
 
+  public double[] getAngularV(){
+    return this.angularV;
+  }
 
-  public double[] move(double time) { //use the friction # to simulate movement
-    return this.position; //placeholder until we code this
+  public void setAngularV(double[] angularV){
+    this.angularV = angularV;
   }
 
   public double[] getPosition() {
@@ -75,14 +81,6 @@ public class Particle {
 
   public void setVelocity(double[] velocity) {
     this.velocity = velocity;
-  }
-
-  public boolean isOnBoard() {
-    return this.onBoard;
-  }
-
-  public boolean isMoving() {
-    return this.isMoving;
   }
 
 }
