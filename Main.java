@@ -310,9 +310,9 @@ public class Main {
 	    for(double[] f : speeds){
 				for(double speed : f){
 					dos.writeUTF(Double.toString(speed));
-					dos.writeUTF(", ");
+					dos.writeUTF(",");
 				}
-				dos.writeUTF("|| ");
+				dos.writeUTF("| ");
 			}
 	  	dos.close();
 		}
