@@ -12,7 +12,7 @@ public class Main {
 	//CONTROL PANEL!!! ALSO CHANGE STARTING CONDITIONS AT "INITIALIZE" FUNCTION @ BOTTOM.
 	private static double dimension = 400; //distance from origin to each wall. origin is in the center of the box.
 	private static double r = 2; //radius: CHANGE THE ONE IN CHAMBER>JAVA TOO!!!!!!!!!!
-	private static double ro = 0; //mass distribution inside particles. ranges 0-1, inclusive.
+	private static double ro = 1; //mass distribution inside particles. ranges 0-1, inclusive.
 	//0 = all mass at centerpoint (rotations dont happen here), 1 = balls are hollow shells, 0.2 = even distribution.
 	private static double time = 0;
 	private static double stopTime = 10;
@@ -265,6 +265,10 @@ public class Main {
 
 	public static void addToAnimation(Event e) {
 		double totalTime = e.time - time;
+		boolean reportSpeeds = false;
+		if(e.time < 0.01){
+			reportSpeeds = true;
+		}
 		int numberLayouts = (int)Math.round(totalTime / increment);
 		double[][] newLayout;
 		double[] newSpeed = new double[numberPoints];
@@ -276,7 +280,9 @@ public class Main {
 				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
 			}
 			animation.add(newLayout);
-			speeds.add(newSpeed);
+			if(reportSpeeds == true){
+				speeds.add(newSpeed);
+			}
 		}
  	}
 
@@ -285,7 +291,7 @@ public class Main {
 		}
 
 		public static void animate(){
-			currentLayout = animation.get(0);
+			/*currentLayout = animation.get(0);
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -301,18 +307,20 @@ public class Main {
 
 				try{ Thread.sleep(10); }
 				catch (Exception exc){}
-			}
+				
+			}*/
 
-		String path = "/Users/phillip/Documents/Projects/Gasseous-Simulation/speeds.txt";
+		String path = "C:\\Users\\bob\\Desktop\\speeds.txt";
 		try {
 			FileOutputStream fos = new FileOutputStream(path);
 			DataOutputStream dos = new DataOutputStream(fos);
-	    for(double[] f : speeds){
+			dos.writeUTF("THIS IS ENGLISH FILE! ");
+			for(double[] f : speeds){
 				for(double speed : f){
 					dos.writeUTF(Double.toString(speed));
-					dos.writeUTF(", ");
+					dos.writeUTF("__");
 				}
-				dos.writeUTF("|| ");
+				dos.writeUTF("{}{}{}");
 			}
 	  	dos.close();
 		}
