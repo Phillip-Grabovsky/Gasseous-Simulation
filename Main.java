@@ -4,17 +4,20 @@ import java.util.List;
 import java.awt.Color;
 import javax.swing.JFrame;
 import java.lang.Math;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class Main {
 	//CONTROL PANEL!!! ALSO CHANGE STARTING CONDITIONS AT "INITIALIZE" FUNCTION @ BOTTOM.
 	private static double dimension = 400; //distance from origin to each wall. origin is in the center of the box.
-	private static double r = 1; //radius: CHANGE THE ONE IN CHAMBER>JAVA TOO!!!!!!!!!!
+	private static double r = 2; //radius: CHANGE THE ONE IN CHAMBER>JAVA TOO!!!!!!!!!!
 	private static double ro = 0; //mass distribution inside particles. ranges 0-1, inclusive.
 	//0 = all mass at centerpoint (rotations dont happen here), 1 = balls are hollow shells, 0.2 = even distribution.
 	private static double time = 0;
-	private static double stopTime = 100;
+	private static double stopTime = 10;
 	private static double increment = 0.01; //increment is ONLY used for the animation!
-	private static int numberPoints = 1000; //update this if changes are made to initialize().
+	private static int numberPoints = 300; //update this if changes are made to initialize().
 	//</control panel>
 
 	private static double[] Z = {0,0,0}; //just a zero vector for convenience
@@ -29,6 +32,7 @@ public class Main {
 	//which encode positions of all pieces at each time increment.
 	private static double[][] currentLayout = new double[numberPoints][3]; //a single frame of the animation.
 	private static List<Event> recompute = new ArrayList<Event>(); //events to be recomputed. part of the time-saving structure.
+	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
 
 	public static void main(String[] args) {
 		System.out.println("initialization");
@@ -263,13 +267,16 @@ public class Main {
 		double totalTime = e.time - time;
 		int numberLayouts = (int)Math.round(totalTime / increment);
 		double[][] newLayout;
+		double[] newSpeed = new double[numberPoints];
 
 		for(int i = 0; i<numberLayouts; i++){
 			newLayout = new double[numberPoints][3];
 			for(int j=0; j<spaceArray.length; j++) {
 				newLayout[j] = spaceArray[j].whereAt(i*increment);
+				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
 			}
 			animation.add(newLayout);
+			speeds.add(newSpeed);
 		}
  	}
 
@@ -295,7 +302,26 @@ public class Main {
 				try{ Thread.sleep(10); }
 				catch (Exception exc){}
 			}
+
+		String path = "/Users/phillip/Documents/Projects/Gasseous-Simulation/speeds.txt";
+		try {
+			FileOutputStream fos = new FileOutputStream(path);
+			DataOutputStream dos = new DataOutputStream(fos);
+	    for(double[] f : speeds){
+				for(double speed : f){
+					dos.writeUTF(Double.toString(speed));
+					dos.writeUTF(", ");
+				}
+				dos.writeUTF("|| ");
+			}
+	  	dos.close();
 		}
+		catch (IOException e) {
+			System.out.println("IOException : " + e);
+		}
+
+	}
+
 
 		public static double squareMag(double[] v){
 			return (v[0]*v[0]) + (v[1]*v[1]) + (v[2]*v[2]);

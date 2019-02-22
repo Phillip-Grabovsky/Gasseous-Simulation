@@ -15,7 +15,7 @@ public class Chamber extends JPanel {
 
 
   public static final int WINDOW_SIZE = 800;
-  public static final int RADIUS = 1;
+  public static final int RADIUS = 2;
   //private double[][][] animation;
 
 	//The dimensions of the panel
