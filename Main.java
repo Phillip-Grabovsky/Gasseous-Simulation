@@ -9,17 +9,72 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Main {
-	//CONTROL PANEL!!! ALSO CHANGE STARTING CONDITIONS AT "INITIALIZE" FUNCTION @ BOTTOM.
-	private static double dimension = 400; //distance from origin to each wall. origin is in the center of the box.
-	private static double r = 2; //radius: CHANGE THE ONE IN CHAMBER>JAVA TOO!!!!!!!!!!
-	private static double ro = 1; //mass distribution inside particles. ranges 0-1, inclusive.
-	//0 = all mass at centerpoint (rotations dont happen here), 1 = balls are hollow shells, 0.2 = even distribution.
-	private static double time = 0;
-	private static double stopTime = 10;
-	private static double increment = 0.01; //increment is ONLY used for the animation!
-	private static int numberPoints = 300; //update this if changes are made to initialize().
-	//</control panel>
 
+
+
+
+	//CONTROL PANEL!!! ----------------------------------------------------------
+	//you can also change starting arrangement of particles in the
+	//	"initialize" function on the bottom.
+
+	private static int numberPoints = 20;
+	//Make sure that this corresponds with the # of points you make in the
+	// initialize function at the bottom.
+
+	private static int dimension = 400;
+	//distance from origin to each wall. origin is in the very center of the box.
+
+	private static int r = 2;
+	//radius of each particle.
+
+	private static double ro = 0;
+	//mass distribution inside particles. ranges 0-1, inclusive.
+		//0 = all mass at centerpoint (rotations dont happen here),
+		//1 = balls are hollow shells,
+		//0.2 = even distribution.
+
+	private static double stopTime = 20;
+	//how much time to run the simulation.
+
+	private static double increment = 0.01;
+	//increment is ONLY used for the animation (the simulation's time between each frame)
+	//make sure it is finer than the time between collisions, or the animation will be shit.
+
+	private static boolean enable3dVisuals = true;
+	//3d mode makes closer particles seem bigger to get a sense of depth
+
+	public static boolean simulateInOnly2d = false;
+	//simulate a 2d gas as opposed to a 3d gas.
+
+	private static boolean outputFinalSpeeds = false;
+	//this outputs the final speed distribution at the end for data collection.
+	//this function is a little buggy. It is set by default to only report at the last
+	//	time step/animational increment, though this sometimes fails.
+	//also, because the output file is filled with numbers and delimiters, the
+	//	text may be displayed automatically using some other encoding format than UTF,
+	// 	making your data complete garbage. The best solution I have found is to run the
+	//	simulation again and hope that you're met with numbers and not chinese characters.
+	//^^I have not experimented much with changing the delimiters, that may change something.
+
+	private static String path = "/Users/phillip/Documents/Projects/Gasseous-Simulation/speeds.txt";
+	//the path for the output file of the speed data from above.
+
+	private static String speedDelimiter = ",";
+	//separator between each speed value in the file above.
+
+	private static String frameDelimiter = "||";
+	//if multiple frames do end up being printed in the file above, this string will
+	//separate them so you can choose between the two data sets (as opposed to accidentally
+	//graphing one giant combined data set from multiple instances in time)
+
+	//</control panel>------------------------------------------------------------
+
+
+
+
+
+
+	private static double time = 0;
 	private static double[] Z = {0,0,0}; //just a zero vector for convenience
 	private static List<Particle> space = new ArrayList<Particle>(); //all chaps on the board.
 	private static Particle[] spaceArray;
@@ -265,9 +320,15 @@ public class Main {
 
 	public static void addToAnimation(Event e) {
 		double totalTime = e.time - time;
-		boolean reportSpeeds = false;
-		if(e.time < 0.01){
+		boolean reportSpeeds;
+		if(outputFinalSpeeds == false){
+			reportSpeeds = false;
+		}
+		else if(e.time > time - 2*increment){
 			reportSpeeds = true;
+		}
+		else{
+			reportSpeeds = false;
 		}
 		int numberLayouts = (int)Math.round(totalTime / increment);
 		double[][] newLayout;
@@ -291,11 +352,11 @@ public class Main {
 		}
 
 		public static void animate(){
-			/*currentLayout = animation.get(0);
+			currentLayout = animation.get(0);
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber());
+			frame.add(new Chamber(r, dimension, enable3dVisuals));
 			frame.pack();
 			frame.setVisible(true);
 
@@ -308,24 +369,25 @@ public class Main {
 				try{ Thread.sleep(10); }
 				catch (Exception exc){}
 
-			}*/
-
-		String path = "C:\\Users\\bob\\Desktop\\speeds.txt";
-		try {
-			FileOutputStream fos = new FileOutputStream(path);
-			DataOutputStream dos = new DataOutputStream(fos);
-			dos.writeUTF("THIS IS ENGLISH FILE! ");
-			for(double[] f : speeds){
-				for(double speed : f){
-					dos.writeUTF(Double.toString(speed));
-					dos.writeUTF("__");
-				}
-				dos.writeUTF("{}{}{}");
 			}
-	  	dos.close();
-		}
-		catch (IOException e) {
-			System.out.println("IOException : " + e);
+
+		if(outputFinalSpeeds == true){
+			try {
+				FileOutputStream fos = new FileOutputStream(path);
+				DataOutputStream dos = new DataOutputStream(fos);
+				for(double[] f : speeds){
+					for(double speed : f){
+						dos.writeUTF(Double.toString(speed));
+						dos.writeUTF(speedDelimiter);
+					}
+					dos.writeUTF(frameDelimiter);
+				}
+		  	dos.close();
+			}
+			catch (IOException e) {
+				System.out.println("IOException : " + e);
+			}
+
 		}
 
 	}
@@ -353,11 +415,16 @@ public class Main {
 			return answer;
 		}
 
+		public static int getDimension(){
+			return dimension;
+		}
+
 	 public static void initialize(){
 		 spaceArray = new Particle[numberPoints];
 
 		 for(int i = 0; i<numberPoints; i++) {
 			 space.add(new Particle());
+			 //no constructor: simply creates random particles.
 		 }
 
 		 for(int i=0; i<numberPoints; i++){
@@ -375,6 +442,23 @@ public class Main {
 			spaceArray[i] = space.get(i);
 			spaceArray[i].FinishStructure();
  		 }
+
+		 //dont touch this portion
+		 if(simulateInOnly2d == true){
+			 for(Particle p : spaceArray) {
+				 double[] v = p.getVelocity();
+				 double[] P = p.getPosition();
+				 double[] av = p.getAngularV();
+
+				 double[] newV = {v[0], v[1], 0};
+				 double[] newP = {P[1], P[1], 0};
+				 double[] newAV = {av[0], 0, 0};
+
+				 p.setVelocity(newV);
+				 p.setPosition(newV);
+				 p.setAngularV(newAV);
+			 }
+		 }
 	 }
 
 }

@@ -12,10 +12,23 @@ public class Particle {
   private List<Event> type2liquid= new ArrayList<Event>();
 
   public Particle(){
+    int size = Main.getDimension();
     Random random = new Random();
-    this.position = new double[]{(random.nextDouble()*800)-400, (random.nextDouble()*800)-400, 0};
-    this.velocity = new double[]{(random.nextDouble()*800)-400, (random.nextDouble()*800)-400, 0};
-    this.angularV = new double[]{0,0,0};
+    double randPos1 = (random.nextDouble()*2*size)-size;
+    double randPos2 = (random.nextDouble()*2*size)-size;
+    double randPos3 = (random.nextDouble()*2*size)-size;
+
+    double randVel1 = (random.nextDouble()*2*size)-size;
+    double randVel2 = (random.nextDouble()*2*size)-size;
+    double randVel3 = (random.nextDouble()*2*size)-size;
+
+    double randAngVel1 = (random.nextDouble()*2*10000)-10000;
+    double randAngVel2 = (random.nextDouble()*2*10000)-10000;
+    double randAngVel3 = (random.nextDouble()*2*10000)-10000;
+
+    this.position = new double[]{randPos1,randPos2, randPos3};
+    this.velocity = new double[]{randVel1,randVel2,randVel3};
+    this.angularV = new double[]{randAngVel1,randAngVel2,randAngVel3};
   }
 
   public void FinishStructure(){

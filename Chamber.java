@@ -13,10 +13,15 @@ import javax.swing.JPanel;
 
 public class Chamber extends JPanel {
 
+  public static int WINDOW_SIZE;
+  public static int RADIUS;
+  public static boolean enable3dVisuals;
 
-  public static final int WINDOW_SIZE = 800;
-  public static final int RADIUS = 2;
-  //private double[][][] animation;
+  public Chamber(int radius, int dimension, boolean enable3d){
+    this.WINDOW_SIZE = 2*dimension;
+    this.RADIUS = radius;
+    this.enable3dVisuals = enable3d;
+  }
 
 	//The dimensions of the panel
 	public Dimension getPreferredSize() {
@@ -33,18 +38,16 @@ public class Chamber extends JPanel {
 		this.setBackground(Color.WHITE);
 
     //draw the box.
-    g.drawLine(0,0,800,0);
-    g.drawLine(800,0,800,800);
-    g.drawLine(800,800,0,800);
-    g.drawLine(0,800,0,0);
+    g.drawLine(0,0,WINDOW_SIZE,0);
+    g.drawLine(WINDOW_SIZE,0,WINDOW_SIZE,WINDOW_SIZE);
+    g.drawLine(WINDOW_SIZE, WINDOW_SIZE,0,WINDOW_SIZE);
+    g.drawLine(0,WINDOW_SIZE,0,0);
 
     double[][] layout = Main.getCurrentLayout(); //get the frame to display
 
     //display it
     for(double[] position : layout){
-      int p0 = (int)Math.round(position[0]+400);
-      int p1 = (int)Math.round(position[1]+400);
-      drawChap(g,p0,p1);
+      drawChap(g,position[0],position[1],position[2]);
     }
 
   }
@@ -59,9 +62,14 @@ public class Chamber extends JPanel {
 	}
 
 	//Draw circle with the x and y being the center coordinates of the circle
-	public void drawChap(Graphics g, int x, int y) {
+	public void drawChap(Graphics g, int x, int y, int z) {
 
-		g.fillOval(x - RADIUS, y - RADIUS, 2 * RADIUS, 2 * RADIUS);
+    double zScalar = 10 * ((double)z/800);
+    int intZ = (int)(Math.round(zScalar));
+    if(enable3dVisuals == false){
+      intZ = 1;
+    }
+		g.fillOval(x - RADIUS, y - RADIUS, 2 * intZ * RADIUS, 2 * intZ * RADIUS);
 
 	}
 
