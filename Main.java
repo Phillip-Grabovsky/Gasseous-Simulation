@@ -52,6 +52,8 @@ public class Main {
 	//increment is ONLY used for the animation (the simulation's time between each frame)
 	//make sure it is finer than the time between collisions, or the animation will be shit.
 
+	private static boolean drawBox = true;
+
 	private static boolean enable3dVisuals = true;
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
@@ -410,7 +412,7 @@ public class Main {
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber(r, dimension, enable3dVisuals, sizeChangingFactor, viewerDistanceRatio));
+			frame.add(new Chamber(r, dimension, enable3dVisuals, sizeChangingFactor, viewerDistanceRatio, drawBox));
 			frame.pack();
 			frame.setVisible(true);
 

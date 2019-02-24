@@ -17,6 +17,7 @@ public class Chamber extends JPanel {
   private int RADIUS;
   private double sizeChanging;
   private boolean enable3dVisuals;
+  private boolean drawBox;
 
   //precalculated lines for 3d visulizer:
   private int[] line1 = new int[4];
@@ -26,11 +27,12 @@ public class Chamber extends JPanel {
   private int[] line3 = new int[4];
   private int[] line4 = new int[4];
 
-  public Chamber(int radius, int dimension, boolean e3d, double sizeChanging, double viewerRatio){
+  public Chamber(int radius, int dimension, boolean e3d, double sizeChanging, double viewerRatio, boolean drawBox){
     this.WINDOW_SIZE = 2*dimension;
     this.RADIUS = radius;
     this.sizeChanging = sizeChanging;
     this.enable3dVisuals = e3d;
+    this.drawBox = drawBox;
     if(enable3dVisuals == true){
       double D = WINDOW_SIZE/2;
       double Z = WINDOW_SIZE;
@@ -86,12 +88,14 @@ public class Chamber extends JPanel {
 		this.setBackground(Color.WHITE);
 
     //draw the box.
-    g.drawLine(0,0,WINDOW_SIZE,0);
-    g.drawLine(WINDOW_SIZE,0,WINDOW_SIZE,WINDOW_SIZE);
-    g.drawLine(WINDOW_SIZE, WINDOW_SIZE,0,WINDOW_SIZE);
-    g.drawLine(0,WINDOW_SIZE,0,0);
+    if(drawBox == true){
+      g.drawLine(0,0,WINDOW_SIZE,0);
+      g.drawLine(WINDOW_SIZE,0,WINDOW_SIZE,WINDOW_SIZE);
+      g.drawLine(WINDOW_SIZE, WINDOW_SIZE,0,WINDOW_SIZE);
+      g.drawLine(0,WINDOW_SIZE,0,0);
+    }
 
-    if(enable3dVisuals == true){
+    if(enable3dVisuals == true && drawBox == true){
       //THIS CODE IS ABSOLUTE TRASH! REALLY GOTTA FIX THIS!!!!!!!!! ARGH IT SUCKS SO MUCH
       g.drawLine(line1[0],line1[1],line1[2],line1[3]);
       g.drawLine(line2[0],line2[1],line2[2],line2[3]);
