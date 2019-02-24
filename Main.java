@@ -17,14 +17,15 @@ public class Main {
 	//you can also change starting arrangement of particles in the
 	//	"initialize" function on the bottom.
 
-	private static int numberPoints = 20;
+	//section 1: simulation---------------------
+	private static int numberPoints = 50;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 5;
 	//radius of each particle.
 
 	private static double ro = 0;
@@ -33,19 +34,39 @@ public class Main {
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 20;
+	private static double stopTime = 200;
 	//how much time to run the simulation.
 
+	private static boolean simulateInOnly2d = false;
+	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
+	//	3rd components of velocity and position are set to 0, and the 2nd and
+	//  3rd components of angular velocity will be set to 0. The gas will be
+	//  effectively 'flattened' to a single plane.
+	//if this is set to true, it will override all 3d animation settings to simply
+	//  display a 2d gas.
+
+
+
+	//section 2: animation---------------------
 	private static double increment = 0.01;
 	//increment is ONLY used for the animation (the simulation's time between each frame)
 	//make sure it is finer than the time between collisions, or the animation will be shit.
 
 	private static boolean enable3dVisuals = true;
-	//3d mode makes closer particles seem bigger to get a sense of depth
+	//projects the 3d cube to the 2d screen during animation so that you can naturally
+	// look into the box. Also makes closer particles larger (this can be turned off)
 
-	public static boolean simulateInOnly2d = false;
-	//simulate a 2d gas as opposed to a 3d gas.
+	private static int sizeChangingFactor = 4;
+	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
+	//  any size changing, set it to 0.
 
+	private static double viewerDistanceRatio = 0.5;
+	//3d visualizer projection settings: the distance at which the viewer peers
+	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
+
+
+
+	//section 3: output of data---------------------
 	private static boolean outputFinalSpeeds = false;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
@@ -73,7 +94,7 @@ public class Main {
 
 
 
-
+	//other variables. NOT for users to change unless you know what you're doing!!!!
 	private static double time = 0;
 	private static double[] Z = {0,0,0}; //just a zero vector for convenience
 	private static List<Particle> space = new ArrayList<Particle>(); //all chaps on the board.
@@ -90,6 +111,11 @@ public class Main {
 	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
 
 	public static void main(String[] args) {
+		if(simulateInOnly2d == true){
+			enable3dVisuals = false;
+			sizeChangingFactor = 1;
+		}
+
 		System.out.println("initialization");
 		initialize(); //initializes both event storers and all positions & vels.
 		System.out.println("init done.");
@@ -337,7 +363,35 @@ public class Main {
 		for(int i = 0; i<numberLayouts; i++){
 			newLayout = new double[numberPoints][3];
 			for(int j=0; j<spaceArray.length; j++) {
-				newLayout[j] = spaceArray[j].whereAt(i*increment);
+
+				///3D Visuals!! Woohoo!
+				double newX;
+				double newY;
+				if(enable3dVisuals == true){
+					double[] XYZ =  spaceArray[j].whereAt(i*increment);
+					double X = XYZ[0];
+					double Y = XYZ[1];
+					double noShiftZ = XYZ[2];
+					double Z = dimension - noShiftZ;
+
+					//we first project the X.
+					double D = -1 * X;
+					double V = dimension * 2 * viewerDistanceRatio;
+					double shiftX = (D * Z)/(Z + V);
+					newX = X + shiftX;
+
+					//now we do same for Y.
+					D = -1 * Y;
+					double shiftY = (D * Z)/(Z + V);
+					newY = Y + shiftY;
+
+					newLayout[j] = new double[]{newX, newY, noShiftZ};
+
+				}
+				else{
+					newLayout[j] = spaceArray[j].whereAt(i*increment);
+				}
+
 				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
 			}
 			animation.add(newLayout);
@@ -356,7 +410,7 @@ public class Main {
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber(r, dimension, enable3dVisuals));
+			frame.add(new Chamber(r, dimension, enable3dVisuals, sizeChangingFactor, viewerDistanceRatio));
 			frame.pack();
 			frame.setVisible(true);
 

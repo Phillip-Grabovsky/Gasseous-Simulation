@@ -15,16 +15,17 @@ public class Particle {
     int size = Main.getDimension();
     Random random = new Random();
     double randPos1 = (random.nextDouble()*2*size)-size;
-    double randPos2 = (random.nextDouble()*2*size)-size;
+    double randPos2 = (random.nextDouble()*2*size)-size; //shitty. gosh darn. code. yuck
     double randPos3 = (random.nextDouble()*2*size)-size;
 
-    double randVel1 = (random.nextDouble()*2*size)-size;
-    double randVel2 = (random.nextDouble()*2*size)-size;
-    double randVel3 = (random.nextDouble()*2*size)-size;
+    double randVel1 = (random.nextDouble()*4*size)-2*size;
+    double randVel2 = (random.nextDouble()*4*size)-2*size;
+    double randVel3 = (random.nextDouble()*4*size)-2*size;
 
-    double randAngVel1 = (random.nextDouble()*2*10000)-10000;
-    double randAngVel2 = (random.nextDouble()*2*10000)-10000;
-    double randAngVel3 = (random.nextDouble()*2*10000)-10000;
+
+    double randAngVel1 = (random.nextDouble()*2*20)-20;
+    double randAngVel2 = (random.nextDouble()*2*20)-20;
+    double randAngVel3 = (random.nextDouble()*2*20)-20;
 
     this.position = new double[]{randPos1,randPos2, randPos3};
     this.velocity = new double[]{randVel1,randVel2,randVel3};
