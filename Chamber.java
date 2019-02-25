@@ -138,20 +138,20 @@ public class Chamber extends JPanel {
     int x = (int)Math.round(p0+400);
     int y = (int)Math.round(p1+400); //TODO shitty code, do it in a loop. why am i stupid like this?
     int z = (int)Math.round(p2+400);
-    int intZScale;
+    int intRadius;
 
     if(enable3dVisuals == true){
-      double zScalar = Math.abs(sizeChanging * ((double)z/800));
-      intZScale = (int)(Math.round(zScalar));
+      double realRadius = sizeChanging * ((double)z/800) * RADIUS;
+      intRadius = (int)(Math.round(realRadius));
     }
     else{
-      intZScale = 1;
+      intRadius = RADIUS;
     }
 
-    if(intZScale == 0){
-      intZScale = 1;
+    if(intRadius == 0){
+      intRadius = 1;
     }
-		g.fillOval(x - RADIUS, y - RADIUS, 2 * intZScale * RADIUS, 2 * intZScale * RADIUS);
+		g.fillOval(x - intRadius, y - intRadius, 2*intRadius, 2 * intRadius);
 
 	}
 
