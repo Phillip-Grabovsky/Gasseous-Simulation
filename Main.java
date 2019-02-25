@@ -25,7 +25,7 @@ public class Main {
 	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 5;
+	private static int r = 2;
 	//radius of each particle.
 
 	private static double ro = 0;
@@ -34,7 +34,7 @@ public class Main {
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 200;
+	private static double stopTime = 100;
 	//how much time to run the simulation.
 
 	private static boolean simulateInOnly2d = false;
@@ -58,7 +58,7 @@ public class Main {
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
 
-	private static int sizeChangingFactor = 4;
+	private static int sizeChangingFactor = 8;
 	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
 	//  any size changing, set it to 0.
 
@@ -66,6 +66,8 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
+	private static int waitTime = 10;
+	//the amount of milliseconds to wait after each frame.
 
 
 	//section 3: output of data---------------------
@@ -422,7 +424,7 @@ public class Main {
 
 				frame.repaint();
 
-				try{ Thread.sleep(10); }
+				try{ Thread.sleep(waitTime); }
 				catch (Exception exc){}
 
 			}
