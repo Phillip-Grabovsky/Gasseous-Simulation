@@ -25,7 +25,7 @@ public class Main {
 	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 10;
 	//radius of each particle.
 
 	private static double ro = 0;
@@ -34,7 +34,7 @@ public class Main {
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 100;
+	private static double stopTime = 50;
 	//how much time to run the simulation.
 
 	private static boolean simulateInOnly2d = false;
@@ -44,6 +44,8 @@ public class Main {
 	//  effectively 'flattened' to a single plane.
 	//if this is set to true, it will override all 3d animation settings to simply
 	//  display a 2d gas.
+
+
 
 
 
@@ -58,7 +60,7 @@ public class Main {
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
 
-	private static int sizeChangingFactor = 8;
+	//private static int sizeChangingFactor = 8;
 	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
 	//  any size changing, set it to 0.
 
@@ -70,13 +72,16 @@ public class Main {
 	//the amount of milliseconds to wait after each frame.
 
 
+
+
+
 	//section 3: output of data---------------------
 	private static boolean outputFinalSpeeds = false;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
 	//also, because the output file is filled with numbers and delimiters, the
-	//	text may be displayed automatically using some other encoding format than UTF,
+	//	text may be displayed automatically using some other encoding format than UTF
 	// 	making your data complete garbage. The best solution I have found is to run the
 	//	simulation again and hope that you're met with numbers and not chinese characters.
 	//^^I have not experimented much with changing the delimiters, that may change something.
@@ -110,14 +115,13 @@ public class Main {
 	private static Event[] wallList = new Event[numberPoints];
 	private static List<double[][]> animation = new ArrayList<double[][]>(); //entire animation. composed of frames,
 	//which encode positions of all pieces at each time increment.
-	private static double[][] currentLayout = new double[numberPoints][3]; //a single frame of the animation.
+	private static double[][] currentLayout = new double[numberPoints][5]; //a single frame of the animation.
 	private static List<Event> recompute = new ArrayList<Event>(); //events to be recomputed. part of the time-saving structure.
 	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
 
 	public static void main(String[] args) {
 		if(simulateInOnly2d == true){
 			enable3dVisuals = false;
-			sizeChangingFactor = 1;
 		}
 
 		System.out.println("initialization");
@@ -365,7 +369,7 @@ public class Main {
 		double[] newSpeed = new double[numberPoints];
 
 		for(int i = 0; i<numberLayouts; i++){
-			newLayout = new double[numberPoints][3];
+			newLayout = new double[numberPoints][5];
 			for(int j=0; j<spaceArray.length; j++) {
 
 				///3D Visuals!! Woohoo!
@@ -384,16 +388,26 @@ public class Main {
 					double shiftX = (D * Z)/(Z + V);
 					newX = X + shiftX;
 
+					D = Math.abs(X) + r;
+					double edgeshiftX = (D * Z)/(Z+V);
+
 					//now we do same for Y.
 					D = -1 * Y;
 					double shiftY = (D * Z)/(Z + V);
 					newY = Y + shiftY;
+					D = Math.abs(Y) + r;
+					double edgeshiftY = (D*Z)/(Z+V);
 
-					newLayout[j] = new double[]{newX, newY, noShiftZ};
+					double newxrad = shiftX + r - edgeshiftX;
+					double newyrad = shiftY + r - edgeshiftY;
+
+
+					newLayout[j] = new double[]{newX, newY, noShiftZ, newxrad, newyrad};
 
 				}
 				else{
-					newLayout[j] = spaceArray[j].whereAt(i*increment);
+					double [] pos = spaceArray[j].whereAt(i*increment);
+					newLayout[j] = new double[]{pos[0],pos[1],pos[2],r,r};
 				}
 
 				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
@@ -414,7 +428,7 @@ public class Main {
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber(r, dimension, enable3dVisuals, sizeChangingFactor, viewerDistanceRatio, drawBox));
+			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox));
 			frame.pack();
 			frame.setVisible(true);
 

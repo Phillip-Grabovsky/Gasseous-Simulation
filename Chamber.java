@@ -15,7 +15,7 @@ public class Chamber extends JPanel {
 
   private int WINDOW_SIZE;
   private int RADIUS;
-  private double sizeChanging;
+  //private double sizeChanging;
   private boolean enable3dVisuals;
   private boolean drawBox;
 
@@ -27,10 +27,10 @@ public class Chamber extends JPanel {
   private int[] line3 = new int[4];
   private int[] line4 = new int[4];
 
-  public Chamber(int radius, int dimension, boolean e3d, double sizeChanging, double viewerRatio, boolean drawBox){
+  public Chamber(int radius, int dimension, boolean e3d, double viewerRatio, boolean drawBox){
     this.WINDOW_SIZE = 2*dimension;
     this.RADIUS = radius;
-    this.sizeChanging = sizeChanging;
+    //this.sizeChanging = sizeChanging;
     this.enable3dVisuals = e3d;
     this.drawBox = drawBox;
     if(enable3dVisuals == true){
@@ -120,7 +120,7 @@ public class Chamber extends JPanel {
     //display it
     for(double[] p : layout){
       //3d projection has already been done in the Main.addToAnimation() function.
-      drawChap(g,p[0],p[1],p[2]);
+      drawChap(g,p[0],p[1],p[2],p[3],p[4]);
     }
   }
 
@@ -134,25 +134,14 @@ public class Chamber extends JPanel {
 	}
 
 	//Draw circle with the x and y being the center coordinates of the circle
-	public void drawChap(Graphics g, double p0, double p1, double p2) {
+	public void drawChap(Graphics g, double p0, double p1, double p2, double xr, double yr) {
     int x = (int)Math.round(p0+400);
     int y = (int)Math.round(p1+400); //TODO shitty code, do it in a loop. why am i stupid like this?
     int z = (int)Math.round(p2+400);
-    int intRadius;
+    int xrad = (int)Math.round(xr);
+    int yrad = (int)Math.round(yr);
 
-    if(enable3dVisuals == true){
-      double realRadius = sizeChanging * ((double)z/800) * RADIUS;
-      intRadius = (int)(Math.round(realRadius));
-    }
-    else{
-      intRadius = RADIUS;
-    }
-
-    if(intRadius == 0){
-      intRadius = 1;
-    }
-		g.fillOval(x - intRadius, y - intRadius, 2*intRadius, 2 * intRadius);
-
+		g.fillOval(x - xrad, y - xrad, 2*xrad, 2 * xrad);
 	}
 
 }
