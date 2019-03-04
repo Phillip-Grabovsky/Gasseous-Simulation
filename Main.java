@@ -18,7 +18,7 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 50;
+	private static int numberPoints = 100;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
@@ -64,7 +64,7 @@ public class Main {
 	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
 	//  any size changing, set it to 0.
 
-	private static double viewerDistanceRatio = 0.5;
+	private static double viewerDistanceRatio = 0.75;
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
@@ -388,14 +388,14 @@ public class Main {
 					double shiftX = (D * Z)/(Z + V);
 					newX = X + shiftX;
 
-					D = Math.abs(X) + r;
+					D +=r;
 					double edgeshiftX = (D * Z)/(Z+V);
 
 					//now we do same for Y.
 					D = -1 * Y;
 					double shiftY = (D * Z)/(Z + V);
 					newY = Y + shiftY;
-					D = Math.abs(Y) + r;
+					D += r;
 					double edgeshiftY = (D*Z)/(Z+V);
 
 					double newxrad = shiftX + r - edgeshiftX;
