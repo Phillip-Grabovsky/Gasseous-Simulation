@@ -18,23 +18,23 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 100;
+	private static int numberPoints = 10000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 10;
+	private static int r = 1;
 	//radius of each particle.
 
-	private static double ro = 0;
+	private static double ro = 1;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 50;
+	private static double stopTime = 5;
 	//how much time to run the simulation.
 
 	private static boolean simulateInOnly2d = false;
@@ -50,6 +50,8 @@ public class Main {
 
 
 	//section 2: animation---------------------
+	private static boolean makeAnimation = true;
+
 	private static double increment = 0.01;
 	//increment is ONLY used for the animation (the simulation's time between each frame)
 	//make sure it is finer than the time between collisions, or the animation will be shit.
@@ -68,7 +70,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 10;
+	private static int waitTime = 1;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -76,7 +78,7 @@ public class Main {
 
 
 	//section 3: output of data---------------------
-	private static boolean outputFinalSpeeds = false;
+	private static boolean outputFinalSpeeds = true;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
@@ -130,14 +132,16 @@ public class Main {
 
 		double numberIncrements = 0;
 		while(time < stopTime) {
-			System.out.println("time: " + time);
+			if(time > 1 && time < 1.001){
+				System.out.println("time: " + time);
+			}
 			findNextEvent(); //finds time and nature of the next event.
-			addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
+			//addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 		}
 
-		animate(); //display an animation of our simulation!
+		//animate(); //display an animation of our simulation!
 
 	}
 
@@ -353,12 +357,15 @@ public class Main {
 	}
 
 	public static void addToAnimation(Event e) {
+		if(makeAnimation == false) {
+			return;
+		}
 		double totalTime = e.time - time;
 		boolean reportSpeeds;
 		if(outputFinalSpeeds == false){
 			reportSpeeds = false;
 		}
-		else if(e.time > time - 2*increment){
+		else if(e.time > stopTime - 2*increment){
 			reportSpeeds = true;
 		}
 		else{
@@ -409,11 +416,13 @@ public class Main {
 					double [] pos = spaceArray[j].whereAt(i*increment);
 					newLayout[j] = new double[]{pos[0],pos[1],pos[2],r,r};
 				}
-
-				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
+				if(reportSpeeds == true && i == numberLayouts - 1){
+					newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
+				}
 			}
 			animation.add(newLayout);
-			if(reportSpeeds == true){
+			if(reportSpeeds == true && i == numberLayouts - 1){
+				System.out.println("REPORTING TIME: " + e.time);
 				speeds.add(newSpeed);
 			}
 		}
@@ -424,6 +433,9 @@ public class Main {
 		}
 
 		public static void animate(){
+			if(makeAnimation == false){
+				return;
+			}
 			currentLayout = animation.get(0);
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
