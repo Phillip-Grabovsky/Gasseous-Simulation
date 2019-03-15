@@ -135,9 +135,9 @@ public class Chamber extends JPanel {
 
 	//Draw circle with the x and y being the center coordinates of the circle
 	public void drawChap(Graphics g, double p0, double p1, double p2, double xr, double yr) {
-    int x = (int)Math.round(p0+400);
-    int y = (int)Math.round(p1+400); //TODO shitty code, do it in a loop. why am i stupid like this?
-    int z = (int)Math.round(p2+400);
+    int x = (int)Math.round(p0+(int)WINDOW_SIZE/2);
+    int y = (int)Math.round(p1+(int)WINDOW_SIZE/2); //TODO shitty code, do it in a loop. why am i stupid like this?
+    int z = (int)Math.round(p2+(int)WINDOW_SIZE/2);
     int xrad = (int)Math.round(xr);
     int yrad = (int)Math.round(yr);
 

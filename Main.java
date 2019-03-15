@@ -7,6 +7,7 @@ import java.lang.Math;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 public class Main {
 
@@ -18,23 +19,23 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 10000;
+	private static int numberPoints = 5000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
-	private static int dimension = 400;
+	private static int dimension = 100;
 	//distance from origin to each wall. origin is in the very center of the box.
 
 	private static int r = 1;
 	//radius of each particle.
 
-	private static double ro = 1;
+	private static double ro = 0;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 5;
+	private static double stopTime = 0.1;
 	//how much time to run the simulation.
 
 	private static boolean simulateInOnly2d = false;
@@ -58,7 +59,7 @@ public class Main {
 
 	private static boolean drawBox = true;
 
-	private static boolean enable3dVisuals = true;
+	private static boolean enable3dVisuals = false;
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
 
@@ -70,7 +71,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 1;
+	private static int waitTime = 100;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -78,7 +79,7 @@ public class Main {
 
 
 	//section 3: output of data---------------------
-	private static boolean outputFinalSpeeds = true;
+	private static boolean outputFinalSpeeds = false;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
@@ -120,6 +121,8 @@ public class Main {
 	private static double[][] currentLayout = new double[numberPoints][5]; //a single frame of the animation.
 	private static List<Event> recompute = new ArrayList<Event>(); //events to be recomputed. part of the time-saving structure.
 	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
+	private static double[] right = {1,0,0};
+	private static double[] left = {-1,0,0};
 
 	public static void main(String[] args) {
 		if(simulateInOnly2d == true){
@@ -130,18 +133,19 @@ public class Main {
 		initialize(); //initializes both event storers and all positions & vels.
 		System.out.println("init done.");
 
-		double numberIncrements = 0;
+		int numberEvents = 0;
 		while(time < stopTime) {
-			if(time > 1 && time < 1.001){
-				System.out.println("time: " + time);
-			}
+			System.out.println(time);
 			findNextEvent(); //finds time and nature of the next event.
-			//addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
+			if(numberEvents % 100 == 0){
+				addToAnimation(event);
+			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
+			numberEvents++;
 		}
-
-		//animate(); //display an animation of our simulation!
+		addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
+		animate(); //display an animation of our simulation!
 
 	}
 
@@ -206,7 +210,7 @@ public class Main {
 		Event smallestCollide = collideMatrix[1][0];
     for(int i = 0; i < numberPoints; i++) {
       for(int j = 0; j < i; j++) {
-        if(collideMatrix[i][j].time < smallestCollide.time) {
+        if(collideMatrix[i][j].time < smallestCollide.time && collideMatrix[i][j].time > 0) {
 					smallestCollide = collideMatrix[i][j];
         }
       }
@@ -296,21 +300,32 @@ public class Main {
 			//VELOCITIES
 			if(event.type == 1) { //updates linear and angular vels for wall hits.
 				double[] n = event.wallNormal;
-				double[] p = event.p1.getPosition();
-				double[] v = event.p1.getVelocity();
-				double[] omg = event.p1.getAngularV();
+				if(n[0] == right[0]){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{-1*dimension,p[1],p[2]});
+				}
+				else if(n[0] == left[0]){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{dimension,p[1],p[2]});
+				}
+				else{
+					double[] p = event.p1.getPosition();
+					double[] v = event.p1.getVelocity();
+					double[] omg = event.p1.getAngularV();
 
-				//compute some values
-				double Dvn = DP(v,n);
-				double[] Cnomg = CP(n,omg);
-				double[] Cnv = CP(n,v);
-				double Dnomg = DP(n,omg);
+					//compute some values
+					double Dvn = DP(v,n);
+					double[] Cnomg = CP(n,omg);
+					double[] Cnv = CP(n,v);
+					double Dnomg = DP(n,omg);
 
-				//sets new linear velocity
-				event.p1.setVelocity( LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0) );
+					//sets new linear velocity
+					event.p1.setVelocity( LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0) );
 
-				//sets new angular velocity
-				event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
+					//sets new angular velocity
+					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
+
+				}
 
 			}
 			else{
@@ -371,7 +386,7 @@ public class Main {
 		else{
 			reportSpeeds = false;
 		}
-		int numberLayouts = (int)Math.round(totalTime / increment);
+		int numberLayouts = (int)(totalTime / increment)+1;
 		double[][] newLayout;
 		double[] newSpeed = new double[numberPoints];
 
@@ -505,10 +520,34 @@ public class Main {
 
 	 public static void initialize(){
 		 spaceArray = new Particle[numberPoints];
+		 Random random = new Random();
 
 		 for(int i = 0; i<numberPoints; i++) {
-			 space.add(new Particle());
-			 //no constructor: simply creates random particles.
+			 double r1 = (random.nextDouble()*2*dimension)-dimension;
+			 double r2 = (random.nextDouble()*2*dimension)-dimension; //shitty. gosh darn. code. yuck
+			 //double r3 = (random.nextDouble()*2*dimension)-dimension;
+			 double randV1 = (random.nextDouble()*40) - 20;
+			 //double randV2 = (random.nextDouble()*40) - 20;
+			 double randx = (random.nextDouble()*40) - 20;
+			 /*
+			 boolean validate = false;
+			 while(validate == false){
+				 validate = true;
+				 for(int j = 0; j<i; j++){
+					 if(r1 > space.get(j).getPosition()[0] - (2*r) && r1 < space.get(j).getPosition()[0] + (2*r)
+						&& r2 > space.get(j).getPosition()[1] - (2*r) && r1 < space.get(j).getPosition()[1] + (2*r)) {
+					 		validate = false;
+					 }
+				 }
+				 if(validate == false){
+					 r1 = (random.nextDouble()*2*dimension)-dimension;
+					 r2 = (random.nextDouble()*2*dimension)-dimension;
+				 }
+			 }*/
+
+			 double[] randomPos = {r1,r2,0};
+			 space.add(new Particle(randomPos, new double[]{300 + randx,randV1, 0}, Z));
+			 //no args in constructor ==> randomly determine all pos and v.
 		 }
 
 		 for(int i=0; i<numberPoints; i++){
@@ -535,7 +574,7 @@ public class Main {
 				 double[] av = p.getAngularV();
 
 				 double[] newV = {v[0], v[1], 0};
-				 double[] newP = {P[1], P[1], 0};
+				 double[] newP = {P[0], P[1], 0};
 				 double[] newAV = {av[0], 0, 0};
 
 				 p.setVelocity(newV);
