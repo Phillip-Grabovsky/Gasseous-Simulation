@@ -74,7 +74,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 1000;
+	private static int waitTime = 10;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -146,13 +146,6 @@ public class Main {
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
-			}
-			if(time > 9.5){
-				if(numberEvents % 100 == 0){
-					System.out.println(time);
-					addOneEvent();
-					addVelocityMap();
-				}
 			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
@@ -693,7 +686,9 @@ public class Main {
 			 } */
 
 			 double[] randomPos = {r1,r2,0};
-			 space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
+			 //space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
+			 double[] vortexVel = {r2,-r1,0};
+			 space.add(new Particle(randomPos, vortexVel, Z));
 			 //space.add(new Particle());
 			 //no args in constructor ==> randomly determine all pos and v.
 		 }
