@@ -19,7 +19,7 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 1000;
+	private static int numberPoints = 5000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
@@ -146,10 +146,10 @@ public class Main {
 			findNextEvent(); //finds time and nature of the next event.
 			if(numberEvents % 10 == 0){
 				System.out.println(time);
-				//addOneEvent();
+				addOneEvent();
 				addVelocityMap();
 			}
-			addToAnimation(event);
+			//addToAnimation(event);
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
