@@ -23,19 +23,20 @@ public class Main {
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
-	private static int dimension = 100;
+	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 1;
+	private static int r = 4;
 	//radius of each particle.
 
-	private static double ro = 0;
+
+	private static double ro = 1;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
-		//1 = balls are hollow shells,
+		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 0.1;
+	private static double stopTime = 2;
 	//how much time to run the simulation.
 
 	private static boolean simulateInOnly2d = false;
@@ -51,6 +52,8 @@ public class Main {
 
 
 	//section 2: animation---------------------
+	private static int velocityBoxes = 40;
+
 	private static boolean makeAnimation = true;
 
 	private static double increment = 0.01;
@@ -71,7 +74,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 100;
+	private static int waitTime = 1000;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -123,7 +126,10 @@ public class Main {
 	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
 	private static double[] right = {1,0,0};
 	private static double[] left = {-1,0,0};
-
+	private static double[] top = {0,1,0};
+	private static double[] bottom = {0,-1,0};
+	private static List<double[][]> velocityAnimation = new ArrayList<double[][]>();
+	private static double[][] velocityLayout;
 	public static void main(String[] args) {
 		if(simulateInOnly2d == true){
 			enable3dVisuals = false;
@@ -135,17 +141,26 @@ public class Main {
 
 		int numberEvents = 0;
 		while(time < stopTime) {
-			System.out.println(time);
 			findNextEvent(); //finds time and nature of the next event.
-			if(numberEvents % 100 == 0){
-				addToAnimation(event);
+			if(numberEvents % 500 == 0){
+				System.out.println(time);
+				addOneEvent();
+				addVelocityMap();
+			}
+			if(time > 9.5){
+				if(numberEvents % 100 == 0){
+					System.out.println(time);
+					addOneEvent();
+					addVelocityMap();
+				}
 			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
 		}
-		addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
+		//addOneEvent();		//create a smooth series of frames leading up to this event, and add it to the animation.
 		animate(); //display an animation of our simulation!
+		animateVelocities();
 
 	}
 
@@ -198,7 +213,11 @@ public class Main {
 			p.type1.time = update[3];
 
 		}
+		int smallWall = numberPoints - 1;
 		Arrays.sort(wallList);
+		while(wallList[smallWall].time < 0){
+			smallWall--;
+		}
 
 		//now, after updating the walls, update the collisions!
 		for(Event e : recompute){
@@ -210,13 +229,13 @@ public class Main {
 		Event smallestCollide = collideMatrix[1][0];
     for(int i = 0; i < numberPoints; i++) {
       for(int j = 0; j < i; j++) {
-        if(collideMatrix[i][j].time < smallestCollide.time && collideMatrix[i][j].time > 0) {
+        if(collideMatrix[i][j].time - time < smallestCollide.time && collideMatrix[i][j].time - time > 0) {
 					smallestCollide = collideMatrix[i][j];
         }
       }
     }
 		//smallest walltime
-		Event smallestWall = wallList[numberPoints-1];
+		Event smallestWall = wallList[smallWall];
 
 		//pick sooner one of wall or interparticle!
 		if(smallestCollide.time < smallestWall.time) {
@@ -308,6 +327,14 @@ public class Main {
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{dimension,p[1],p[2]});
 				}
+				else if(n[1] == top[1]){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],-1*dimension,p[2]});
+				}
+				else if(n[1] == bottom[1]){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],dimension,p[2]});
+				}
 				else{
 					double[] p = event.p1.getPosition();
 					double[] v = event.p1.getVelocity();
@@ -370,6 +397,96 @@ public class Main {
 			}
 
 	}
+
+	public static void addOneEvent(){
+		double[][] newLayout;
+		double[] newSpeed = new double[numberPoints];
+		newLayout = new double[numberPoints][5];
+		for(int j=0; j<spaceArray.length; j++) {
+			///3D Visuals!! Woohoo!
+			double newX;
+			double newY;
+			if(enable3dVisuals == true){
+				double[] XYZ =  spaceArray[j].getPosition();
+				double X = XYZ[0];
+				double Y = XYZ[1];
+				double noShiftZ = XYZ[2];
+				double Z = dimension - noShiftZ;
+
+				//we first project the X.
+				double D = -1 * X;
+				double V = dimension * 2 * viewerDistanceRatio;
+				double shiftX = (D * Z)/(Z + V);
+				newX = X + shiftX;
+
+				D +=r;
+				double edgeshiftX = (D * Z)/(Z+V);
+
+				//now we do same for Y.
+				D = -1 * Y;
+				double shiftY = (D * Z)/(Z + V);
+				newY = Y + shiftY;
+				D += r;
+				double edgeshiftY = (D*Z)/(Z+V);
+
+				double newxrad = shiftX + r - edgeshiftX;
+				double newyrad = shiftY + r - edgeshiftY;
+
+
+				newLayout[j] = new double[]{newX, newY, noShiftZ, newxrad, newyrad};
+
+			}
+			else{
+				double [] pos = spaceArray[j].getPosition();
+				newLayout[j] = new double[]{pos[0],pos[1],pos[2],r,r};
+			}
+		}
+		animation.add(newLayout);
+	}
+
+
+
+	public static void addVelocityMap(){
+		int size = (dimension*2)/velocityBoxes;
+		double[][] newVelocityMap = new double[velocityBoxes * velocityBoxes][3];
+		//go through each point, updating average velocity in whatever box it's in!
+		for(Particle p : spaceArray){
+			double[] pos = p.getPosition();
+			int[] Box = {-1,-1};
+
+			//find which box it's in!
+			for(int i = 0; i<2; i++){
+				boolean boxFound = false;
+				while(boxFound == false){
+					Box[i]++;
+					/*System.out.println("Box num: " + Box[i]);
+					System.out.println("Range (" + ((Box[i]*size) - dimension) + ", " + (((Box[i]+1)*size)-dimension) +")");
+					System.out.println("Pos: " + pos[i]);*/
+					if(pos[i] >= (Box[i]*size) - dimension && pos[i] <= ((Box[i]+1)*size)-dimension ){
+						//System.out.println("BOXFOUND! " + i);
+						boxFound = true;
+					}
+					if(pos[i] < -1 * dimension){
+						boxFound = true;
+					}
+				}
+			}
+
+			int index = velocityBoxes*Box[1] + Box[0];
+			while(index >= newVelocityMap.length){
+				index -= velocityBoxes;
+			}
+			double[] vel = p.getVelocity();
+			double pointsAveraged = newVelocityMap[index][0];
+			newVelocityMap[index][1] = (newVelocityMap[index][1] * pointsAveraged + vel[0])/(pointsAveraged+1);
+			newVelocityMap[index][2] = (newVelocityMap[index][2] * pointsAveraged + vel[1])/(pointsAveraged+1);
+
+			newVelocityMap[index][0]++;
+		}
+		velocityAnimation.add(newVelocityMap);
+
+	}
+
 
 	public static void addToAnimation(Event e) {
 		if(makeAnimation == false) {
@@ -443,9 +560,16 @@ public class Main {
 		}
  	}
 
+
+
 		public static double[][] getCurrentLayout(){
 			return currentLayout; //returns the current frame of animation to display
 		}
+		public static double[][] getVelocityLayout(){
+			return velocityLayout;
+		}
+
+
 
 		public static void animate(){
 			if(makeAnimation == false){
@@ -455,7 +579,7 @@ public class Main {
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox));
+			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, true));
 			frame.pack();
 			frame.setVisible(true);
 
@@ -491,6 +615,28 @@ public class Main {
 
 	}
 
+	public static void animateVelocities(){
+		velocityLayout = velocityAnimation.get(0);
+		//setup animation stuff
+		JFrame newFrame = new JFrame("Velocities");
+		newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		newFrame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, false));
+		newFrame.pack();
+		newFrame.setVisible(true);
+
+		//for every frame, repaint the screen and wait time.
+		for(double[][] layout : velocityAnimation){
+			velocityLayout = layout; //update which frame of animation to show
+
+			newFrame.repaint();
+
+			try{ Thread.sleep(waitTime); }
+			catch (Exception exc){}
+
+		}
+
+}
+
 
 		public static double squareMag(double[] v){
 			return (v[0]*v[0]) + (v[1]*v[1]) + (v[2]*v[2]);
@@ -523,12 +669,13 @@ public class Main {
 		 Random random = new Random();
 
 		 for(int i = 0; i<numberPoints; i++) {
+
 			 double r1 = (random.nextDouble()*2*dimension)-dimension;
 			 double r2 = (random.nextDouble()*2*dimension)-dimension; //shitty. gosh darn. code. yuck
 			 //double r3 = (random.nextDouble()*2*dimension)-dimension;
-			 double randV1 = (random.nextDouble()*40) - 20;
+			 double randV1 = (random.nextDouble()*100) - 50;
 			 //double randV2 = (random.nextDouble()*40) - 20;
-			 double randx = (random.nextDouble()*40) - 20;
+			 double randx = (random.nextDouble()*100) - 50;
 			 /*
 			 boolean validate = false;
 			 while(validate == false){
@@ -543,10 +690,11 @@ public class Main {
 					 r1 = (random.nextDouble()*2*dimension)-dimension;
 					 r2 = (random.nextDouble()*2*dimension)-dimension;
 				 }
-			 }*/
+			 } */
 
 			 double[] randomPos = {r1,r2,0};
-			 space.add(new Particle(randomPos, new double[]{300 + randx,randV1, 0}, Z));
+			 space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
+			 //space.add(new Particle());
 			 //no args in constructor ==> randomly determine all pos and v.
 		 }
 

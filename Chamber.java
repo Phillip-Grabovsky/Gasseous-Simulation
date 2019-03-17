@@ -18,6 +18,7 @@ public class Chamber extends JPanel {
   //private double sizeChanging;
   private boolean enable3dVisuals;
   private boolean drawBox;
+  private boolean mode;
 
   //precalculated lines for 3d visulizer:
   private int[] line1 = new int[4];
@@ -27,12 +28,17 @@ public class Chamber extends JPanel {
   private int[] line3 = new int[4];
   private int[] line4 = new int[4];
 
-  public Chamber(int radius, int dimension, boolean e3d, double viewerRatio, boolean drawBox){
+  public Chamber(int radius, int dimension, boolean e3d, double viewerRatio, boolean drawBox, boolean vels){
     this.WINDOW_SIZE = 2*dimension;
     this.RADIUS = radius;
     //this.sizeChanging = sizeChanging;
     this.enable3dVisuals = e3d;
     this.drawBox = drawBox;
+    this.mode = vels;
+    if(mode == true){
+      enable3dVisuals = false;
+    }
+
     if(enable3dVisuals == true){
       double D = WINDOW_SIZE/2;
       double Z = WINDOW_SIZE;
@@ -115,23 +121,19 @@ public class Chamber extends JPanel {
 
     }
 
-    double[][] layout = Main.getCurrentLayout(); //get the frame to display
-
     //display it
-    for(double[] p : layout){
-      //3d projection has already been done in the Main.addToAnimation() function.
-      drawChap(g,p[0],p[1],p[2],p[3],p[4]);
+    if(mode == true){
+      double[][] layout = Main.getCurrentLayout(); //get the frame to display
+      for(double[] p : layout){
+        //3d projection has already been done in the Main.addToAnimation() function.
+        drawChap(g,p[0],p[1],p[2],p[3],p[4]);
+      }
+    }
+    else{
+      double[][] layout = Main.getVelocityLayout(); //get the frame to display
+      drawData(g, layout);
     }
   }
-
-	//Prints the board's full data
-	public static void printBoard(List<Particle> chamber){
-
-		for(Particle c : chamber){
-			c.printInfo();
-	    }
-
-	}
 
 	//Draw circle with the x and y being the center coordinates of the circle
 	public void drawChap(Graphics g, double p0, double p1, double p2, double xr, double yr) {
@@ -143,5 +145,32 @@ public class Chamber extends JPanel {
 
 		g.fillOval(x - xrad, y - xrad, 2*xrad, 2 * xrad);
 	}
+
+  public void drawData(Graphics g, double[][] layout){
+    //draw all lines
+    double boxSize = (double)WINDOW_SIZE/Math.sqrt(layout.length);
+    for(int i = 1; i < layout.length; i++){
+      g.drawLine(0, (int)Math.round(boxSize*(double)i), WINDOW_SIZE, (int)Math.round(boxSize*(double)i));
+      g.drawLine((int)Math.round(boxSize*(double)i), 0, (int)Math.round(boxSize*(double)i), WINDOW_SIZE);
+    }
+
+    //draw all vectors
+    for(int i = 0; i< layout.length; i++){
+      //System.out.println("i: " + i);
+      int[] boxCoords = {(int)Math.round(i%Math.sqrt(layout.length)),(int)(i/Math.sqrt(layout.length))};
+      //System.out.println("BoxCoords: (" + boxCoords[0] + ", " + boxCoords[1] + ")");
+      int[] origin = {(int)Math.round(boxCoords[0]*boxSize + 0.5*boxSize),
+       WINDOW_SIZE - (int)Math.round(boxCoords[1]*boxSize + 0.5*boxSize)};
+      //System.out.println("Origin: (" + origin[0] + ", " + origin[1] + ")");
+      double[] velocity = layout[i];
+      double[] dataPoint = {20*velocity[1]/Math.sqrt(Main.squareMag(velocity)),20*velocity[2]/Math.sqrt(Main.squareMag(velocity))};
+      int[] intPoint = {(int)Math.round(dataPoint[0]), (int)Math.round(dataPoint[1])};
+
+      g.drawLine(origin[0] - 1, origin[1] - 1, origin[0] + intPoint[0], origin[1] + intPoint[1]);
+      //g.drawLine(origin[0] - 1, origin[1] - 1, intPoint[0],  intPoint[1]);
+      g.fillOval( origin[0] + intPoint[0] -2, origin[1] + intPoint[1]-2, 4,4);
+
+    }
+  }
 
 }

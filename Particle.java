@@ -18,9 +18,9 @@ public class Particle {
     double randPos2 = (random.nextDouble()*2*size)-size; //shitty. gosh darn. code. yuck
     double randPos3 = (random.nextDouble()*2*size)-size;
 
-    double randVel1 = (random.nextDouble()*2*size)-size;
-    double randVel2 = (random.nextDouble()*2*size)-size;
-    double randVel3 = (random.nextDouble()*2*size)-size;
+    double randVel1 = (random.nextDouble()*8*size)-4*size;
+    double randVel2 = (random.nextDouble()*8*size)-4*size;
+    double randVel3 = (random.nextDouble()*8*size)-4*size;
 
 
     double randAngVel1 = (random.nextDouble()*2*20)-20;
