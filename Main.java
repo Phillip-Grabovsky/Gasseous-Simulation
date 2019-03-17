@@ -19,7 +19,7 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 5000;
+	private static int numberPoints = 1000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
@@ -36,8 +36,10 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 2;
+	private static double stopTime = 5;
 	//how much time to run the simulation.
+
+	private static double wallSpeed = -300;
 
 	private static boolean simulateInOnly2d = false;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
@@ -142,11 +144,12 @@ public class Main {
 		int numberEvents = 0;
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
-			if(numberEvents % 500 == 0){
+			if(numberEvents % 10 == 0){
 				System.out.println(time);
-				addOneEvent();
+				//addOneEvent();
 				addVelocityMap();
 			}
+			addToAnimation(event);
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
@@ -320,17 +323,19 @@ public class Main {
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{dimension,p[1],p[2]});
 				}
-				else if(n[1] == top[1]){
+				/*else if(n[1] == top[1]){
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{p[0],-1*dimension,p[2]});
 				}
 				else if(n[1] == bottom[1]){
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{p[0],dimension,p[2]});
-				}
+				}*/
 				else{
+
 					double[] p = event.p1.getPosition();
-					double[] v = event.p1.getVelocity();
+					double[] vel = event.p1.getVelocity();
+					double[] v = {vel[0] - wallSpeed, vel[1], 0};
 					double[] omg = event.p1.getAngularV();
 
 					//compute some values
@@ -340,8 +345,9 @@ public class Main {
 					double Dnomg = DP(n,omg);
 
 					//sets new linear velocity
-					event.p1.setVelocity( LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0) );
-
+					double[] vNoShift = LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0);
+					double[] vShift = {vNoShift[0] + wallSpeed, vNoShift[1], 0};
+					event.p1.setVelocity( vShift );
 					//sets new angular velocity
 					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
 
@@ -688,8 +694,8 @@ public class Main {
 			 double[] randomPos = {r1,r2,0};
 			 //space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
 			 double[] vortexVel = {r2,-r1,0};
-			 space.add(new Particle(randomPos, vortexVel, Z));
-			 //space.add(new Particle());
+			 //space.add(new Particle(randomPos, vortexVel, Z));
+			 space.add(new Particle());
 			 //no args in constructor ==> randomly determine all pos and v.
 		 }
 
@@ -718,11 +724,10 @@ public class Main {
 
 				 double[] newV = {v[0], v[1], 0};
 				 double[] newP = {P[0], P[1], 0};
-				 double[] newAV = {av[0], 0, 0};
 
 				 p.setVelocity(newV);
 				 p.setPosition(newV);
-				 p.setAngularV(newAV);
+				 p.setAngularV(Z);
 			 }
 		 }
 	 }
