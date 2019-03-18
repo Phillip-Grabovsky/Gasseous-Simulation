@@ -19,7 +19,7 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 100;
+	private static int numberPoints = 1000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
@@ -76,7 +76,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 50;
+	private static int waitTime = 10;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -143,17 +143,12 @@ public class Main {
 
 		int numberEvents = 0;
 		while(time < stopTime) {
-			System.out.println("---------------------------------------------");
-			for(Particle p : space){
-				System.out.println(Arrays.toString(p.getPosition()));
-			}
 			findNextEvent(); //finds time and nature of the next event.
-			if(numberEvents % 10 == 0){
+			if(numberEvents % 100 == 0){
 				System.out.println(time);
-				//addOneEvent();
+				addOneEvent();
 				addVelocityMap();
 			}
-			addToAnimation(event);
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
@@ -229,7 +224,7 @@ public class Main {
 		Event smallestCollide = collideMatrix[1][0];
     for(int i = 0; i < numberPoints; i++) {
       for(int j = 0; j < i; j++) {
-        if(collideMatrix[i][j].time - time < smallestCollide.time && collideMatrix[i][j].time - time > 0) {
+        if(collideMatrix[i][j].time < smallestCollide.time && collideMatrix[i][j].time - time > 0) {
 					smallestCollide = collideMatrix[i][j];
         }
       }
@@ -697,10 +692,10 @@ public class Main {
 			 } */
 
 			 double[] randomPos = {r1,r2,0};
-			 //space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
+			 space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
 			 double[] vortexVel = {r2,-r1,0};
-			 //pace.add(new Particle(randomPos, vortexVel, Z));
-			 space.add(new Particle());
+			 //space.add(new Particle(randomPos, vortexVel, Z));
+			 //space.add(new Particle());
 			 //no args in constructor ==> randomly determine all pos and v.
 		 }
 
