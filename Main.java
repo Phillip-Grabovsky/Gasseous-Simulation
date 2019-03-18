@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 0.1;
+	private static double stopTime = 10;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -94,10 +94,10 @@ public class Main {
 	//	simulation again and hope that you're met with numbers and not chinese characters.
 	//^^I have not experimented much with changing the delimiters, that may change something.
 
-	private static String path = "C:\\Users\\bob\\Documents\\GitHub\\Gasseous-Simulation\\speeds.txt";
+	private static String path = "Macintosh HD 2/Phillip/Desktop/speeds.txt";
 	//the path for the output file of the speed data from above.
 
-	private static String XVelPath = "C:\\Users\\bob\\Documents\\GitHub\\Gasseous-Simulation\\XVels.txt";
+	private static String XVelPath = "Macintosh HD 2/Phillip/Desktop/XVels.txt";
 
 	private static String speedDelimiter = ",";
 	//separator between each speed value in the file above.
