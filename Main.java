@@ -19,7 +19,7 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 1000;
+	private static int numberPoints = 100;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 4;
+	private static double stopTime = 10;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -84,7 +84,7 @@ public class Main {
 
 
 	//section 3: output of data---------------------
-	private static boolean outputFinalSpeeds = false;
+	private static boolean outputFinalSpeeds = true;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
@@ -142,6 +142,7 @@ public class Main {
 		System.out.println("init done.");
 
 		int numberEvents = 0;
+		addSpeeds();
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
 			if(numberEvents % 500 == 0){
@@ -149,12 +150,11 @@ public class Main {
 				addOneEvent();
 				addVelocityMap();
 			}
-			//addToAnimation(event);
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
 		}
-		//addOneEvent();		//create a smooth series of frames leading up to this event, and add it to the animation.
+		addSpeeds();
 		animate(); //display an animation of our simulation!
 		animateVelocities();
 
@@ -486,6 +486,14 @@ public class Main {
 		}
 		velocityAnimation.add(newVelocityMap);
 
+	}
+
+	public static void addSpeeds() {
+		double[] newSpeed = new double[numberPoints];
+		for(int j=0; j<spaceArray.length; j++) {
+			newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
+		}
+		speeds.add(newSpeed);
 	}
 
 
