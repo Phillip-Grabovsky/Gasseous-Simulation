@@ -23,10 +23,10 @@ public class Main {
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
-	private static int dimension = 400;
+	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 4;
+	private static int r = 2;
 	//radius of each particle.
 
 
@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 5;
+	private static double stopTime = 4;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -54,7 +54,7 @@ public class Main {
 
 
 	//section 2: animation---------------------
-	private static int velocityBoxes = 40;
+	private static int velocityBoxes = 10;
 
 	private static boolean makeAnimation = true;
 
@@ -76,7 +76,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 10;
+	private static int waitTime = 100;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -144,11 +144,12 @@ public class Main {
 		int numberEvents = 0;
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
-			if(numberEvents % 100 == 0){
+			if(numberEvents % 500 == 0){
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
 			}
+			//addToAnimation(event);
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
@@ -314,7 +315,7 @@ public class Main {
 			//VELOCITIES
 			if(event.type == 1) { //updates linear and angular vels for wall hits.
 				double[] n = event.wallNormal;
-				/*
+
 				if(n[0] == right[0]){
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{-1*dimension,p[1],p[2]});
@@ -323,6 +324,7 @@ public class Main {
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{dimension,p[1],p[2]});
 				}
+				/*
 				else if(n[1] == top[1]){
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{p[0],-1*dimension,p[2]});
@@ -331,7 +333,7 @@ public class Main {
 					double[] p = event.p1.getPosition();
 					event.p1.setPosition(new double[]{p[0],dimension,p[2]});
 				}*/
-				//else{
+				else{
 
 					double[] p = event.p1.getPosition();
 					double[] vel = event.p1.getVelocity();
@@ -351,7 +353,7 @@ public class Main {
 					//sets new angular velocity
 					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
 
-				//}
+				}
 
 			}
 			else{
@@ -692,7 +694,7 @@ public class Main {
 			 } */
 
 			 double[] randomPos = {r1,r2,0};
-			 space.add(new Particle(randomPos, new double[]{8*(300+randV1), 8*randx, 0}, Z));
+			 space.add(new Particle(randomPos, new double[]{8*(300 + randV1), 8*randx, 0}, Z));
 			 double[] vortexVel = {r2,-r1,0};
 			 //space.add(new Particle(randomPos, vortexVel, Z));
 			 //space.add(new Particle());
