@@ -19,14 +19,14 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 100;
+	private static int numberPoints = 1000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 1;
 	//radius of each particle.
 
 
@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 10;
+	private static double stopTime = 0.1;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -94,8 +94,10 @@ public class Main {
 	//	simulation again and hope that you're met with numbers and not chinese characters.
 	//^^I have not experimented much with changing the delimiters, that may change something.
 
-	private static String path = "/Users/phillip/Documents/Projects/Gasseous-Simulation/speeds.txt";
+	private static String path = "C:\\Users\\bob\\Documents\\GitHub\\Gasseous-Simulation\\speeds.txt";
 	//the path for the output file of the speed data from above.
+
+	private static String XVelPath = "C:\\Users\\bob\\Documents\\GitHub\\Gasseous-Simulation\\XVels.txt";
 
 	private static String speedDelimiter = ",";
 	//separator between each speed value in the file above.
@@ -132,6 +134,11 @@ public class Main {
 	private static double[] bottom = {0,-1,0};
 	private static List<double[][]> velocityAnimation = new ArrayList<double[][]>();
 	private static double[][] velocityLayout;
+	private static double laminarStops;
+	private static boolean flowGoing = true;
+	private static double averageXVel;
+	private static List<Double> XVelsFile = new ArrayList<Double>();
+
 	public static void main(String[] args) {
 		if(simulateInOnly2d == true){
 			enable3dVisuals = false;
@@ -140,8 +147,8 @@ public class Main {
 		System.out.println("initialization");
 		initialize(); //initializes both event storers and all positions & vels.
 		System.out.println("init done.");
-
 		int numberEvents = 0;
+
 		addSpeeds();
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
@@ -149,11 +156,18 @@ public class Main {
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
+				//System.out.println(averageXVel);
+				if(averageXVel < 10 && flowGoing){
+					System.out.println("FLOW IS DONE!");
+					flowGoing = false;
+					laminarStops = time;
+				}
 			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
 			numberEvents++;
 		}
+		System.out.println(laminarStops);
 		addSpeeds();
 		animate(); //display an animation of our simulation!
 		animateVelocities();
@@ -451,6 +465,7 @@ public class Main {
 		int size = (dimension*2)/velocityBoxes;
 		double[][] newVelocityMap = new double[velocityBoxes * velocityBoxes][3];
 		//go through each point, updating average velocity in whatever box it's in!
+		double totalXVel = 0;
 		for(Particle p : spaceArray){
 			double[] pos = p.getPosition();
 			int[] Box = {-1,-1};
@@ -483,7 +498,10 @@ public class Main {
 			newVelocityMap[index][2] = (newVelocityMap[index][2] * pointsAveraged + vel[1])/(pointsAveraged+1);
 
 			newVelocityMap[index][0]++;
+			totalXVel += vel[0];
 		}
+		averageXVel = totalXVel / numberPoints;
+		XVelsFile.add(averageXVel);
 		velocityAnimation.add(newVelocityMap);
 
 	}
@@ -620,6 +638,19 @@ public class Main {
 				System.out.println("IOException : " + e);
 			}
 
+		}
+
+		try {
+			FileOutputStream fos = new FileOutputStream(XVelPath);
+			DataOutputStream dos = new DataOutputStream(fos);
+			for(Double f : XVelsFile){
+				dos.writeUTF(Double.toString(f));
+				dos.writeUTF(speedDelimiter);
+			}
+			dos.close();
+		}
+		catch (IOException e) {
+			System.out.println("IOException : " + e);
 		}
 
 	}
