@@ -26,7 +26,7 @@ public class Main {
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 1;
+	private static int r = 2;
 	//radius of each particle.
 
 
@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 10;
+	private static double stopTime = 0.1;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -76,7 +76,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 100;
+	private static int waitTime = 10000;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -94,10 +94,10 @@ public class Main {
 	//	simulation again and hope that you're met with numbers and not chinese characters.
 	//^^I have not experimented much with changing the delimiters, that may change something.
 
-	private static String path = "Macintosh HD 2/Phillip/Desktop/speeds.txt";
+	private static String path = "/Users/Phillip/Desktop/speeds.txt";
 	//the path for the output file of the speed data from above.
 
-	private static String XVelPath = "Macintosh HD 2/Phillip/Desktop/XVels.txt";
+	private static String XVelPath = "/Users/Phillip/Desktop/XVels.txt";
 
 	private static String speedDelimiter = ",";
 	//separator between each speed value in the file above.
@@ -148,16 +148,18 @@ public class Main {
 		initialize(); //initializes both event storers and all positions & vels.
 		System.out.println("init done.");
 		int numberEvents = 0;
+		double x=0;
 
 		addSpeeds();
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
-			if(numberEvents % 500 == 0){
+			if(time > x){
+				x+=0.02;
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
 				//System.out.println(averageXVel);
-				if(averageXVel < 10 && flowGoing){
+				if(averageXVel < 20 && flowGoing){
 					System.out.println("FLOW IS DONE!");
 					flowGoing = false;
 					laminarStops = time;
