@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 0.1;
+	private static double stopTime = 3;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -76,7 +76,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 10000;
+	private static int waitTime = 5;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -84,7 +84,7 @@ public class Main {
 
 
 	//section 3: output of data---------------------
-	private static boolean outputFinalSpeeds = true;
+	private static boolean outputFinalSpeeds = false;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
@@ -154,16 +154,16 @@ public class Main {
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
 			if(time > x){
-				x+=0.02;
+				x+=0.001;
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
 				//System.out.println(averageXVel);
-				if(averageXVel < 20 && flowGoing){
+				/*if(averageXVel < 20 && flowGoing){
 					System.out.println("FLOW IS DONE!");
 					flowGoing = false;
 					laminarStops = time;
-				}
+				}*/
 			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
@@ -611,6 +611,8 @@ public class Main {
 			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, true));
 			frame.pack();
 			frame.setVisible(true);
+			try{ Thread.sleep(waitTime*2000); }
+			catch (Exception exc){}
 
 			//for every frame, repaint the screen and wait time.
 			for(double[][] layout : animation){
@@ -665,6 +667,8 @@ public class Main {
 		newFrame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, false));
 		newFrame.pack();
 		newFrame.setVisible(true);
+		try{ Thread.sleep(waitTime * 2000); }
+		catch (Exception exc){}
 
 		//for every frame, repaint the screen and wait time.
 		for(double[][] layout : velocityAnimation){
