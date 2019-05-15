@@ -122,7 +122,7 @@ public class Chamber extends JPanel {
     }
 
     //display it
-    if(mode == true){
+    if(mode == false){
       double[][] layout = Main.getCurrentLayout(); //get the frame to display
       for(double[] p : layout){
         //3d projection has already been done in the Main.addToAnimation() function.

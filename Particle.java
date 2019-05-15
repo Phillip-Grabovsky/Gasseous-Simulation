@@ -22,13 +22,8 @@ public class Particle {
     double randVel2 = (random.nextDouble()*8*size)-4*size;
     double randVel3 = (random.nextDouble()*8*size)-4*size;
 
-
-    double randAngVel1 = (random.nextDouble()*2*20)-20;
-    double randAngVel2 = (random.nextDouble()*2*20)-20;
-    double randAngVel3 = (random.nextDouble()*2*20)-20;
-
-    this.position = new double[]{randPos1,randPos2, 0};
-    this.velocity = new double[]{randVel1,randVel2,0};
+    this.position = new double[]{randPos1,randPos2, randPos3};
+    this.velocity = new double[]{randVel1,randVel2,randVel3};
     this.angularV = new double[]{0,0,0};
   }
 
