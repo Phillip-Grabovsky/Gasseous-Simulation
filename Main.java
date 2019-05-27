@@ -688,6 +688,14 @@ public class Main {
 			 // space.add(new Particle(PositionVector, velocityVector, angularVelocityVector))
 			 // usually, angularVelocity is set to {0,0,0} whether you want rotation or not.
 			 // with a ro=0, no rotation. Particles will rotate when ro > 0. (see top)
+
+			 //you can modify the random velocities using the following methods:
+			 // Particle.getPosition(), Particle.setPosition(),
+			 // Particle.getVelocity(), Particle.setVelocity(),
+			 // Particle.getAngularV(), Partile.setAngularV().
+
+			 //or you can manually create initial condition using the particle constructor:
+			 // space.add(new Particle(double[] pos, double[] vel, double[] angvel));
 		 }
 
 		 for(int i=0; i<numberPoints; i++){
