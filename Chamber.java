@@ -18,7 +18,7 @@ public class Chamber extends JPanel {
   //private double sizeChanging;
   private boolean enable3dVisuals;
   private boolean drawBox;
-  private boolean mode;
+  private boolean drawVels;
 
   //precalculated lines for 3d visulizer:
   private int[] line1 = new int[4];
@@ -34,8 +34,8 @@ public class Chamber extends JPanel {
     //this.sizeChanging = sizeChanging;
     this.enable3dVisuals = e3d;
     this.drawBox = drawBox;
-    this.mode = vels;
-    if(mode == true){
+    this.drawVels = vels;
+    if(drawVels == true){
       enable3dVisuals = false;
     }
 
@@ -122,7 +122,7 @@ public class Chamber extends JPanel {
     }
 
     //display it
-    if(mode == false){
+    if(drawVels == false){
       double[][] layout = Main.getCurrentLayout(); //get the frame to display
       for(double[] p : layout){
         //3d projection has already been done in the Main.addToAnimation() function.

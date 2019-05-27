@@ -19,14 +19,14 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 100;
+	private static int numberPoints = 500;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 5;
+	private static int r = 2;
 	//radius of each particle.
 
 	private static double ro = 0;
@@ -42,7 +42,7 @@ public class Main {
 	//speed that the top and bottom walls "move" to accurately simulate
 	// viscous pipe flow. (ro must be >0, as rotation is necessary for viscosity.)
 
-	private static boolean[] boundaries = {false, false, false, false, false, false};
+	private static boolean[] boundaries = {true, false, false, false, false, false};
 	//array which determines boundary conditions on particle collision with the wall.
 	//false = normal wall hit physics.
 	//true = 'pipe' behavior: particles which hit wall are teleported with the
@@ -50,7 +50,7 @@ public class Main {
 	//order of conditions to be set: [right, left, top, bottom, close, far]
 	// where close and far are for 3d sims only and refer to depth.
 
-	private static boolean simulateInOnly2d = false;
+	private static boolean simulateInOnly2d = true;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
 	//	3rd components of velocity and position are set to 0, and the 2nd and
 	//  3rd components of angular velocity will be set to 0. The gas will be
@@ -393,7 +393,7 @@ public class Main {
 
 					double[] p = event.p1.getPosition();
 					double[] vel = event.p1.getVelocity();
-					double[] v = {vel[0] - wallSpeed, vel[1], 0};
+					double[] v = {vel[0] - wallSpeed, vel[1], vel[2]};
 					double[] omg = event.p1.getAngularV();
 
 					//compute some values
@@ -404,7 +404,7 @@ public class Main {
 
 					//sets new linear velocity
 					double[] vNoShift = LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0);
-					double[] vShift = {vNoShift[0] + wallSpeed, vNoShift[1], 0};
+					double[] vShift = {vNoShift[0] + wallSpeed, vNoShift[1], vNoShift[2]};
 					event.p1.setVelocity( vShift );
 					//sets new angular velocity
 					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
@@ -633,7 +633,7 @@ public class Main {
 		//setup animation stuff
 		JFrame newFrame = new JFrame("Velocities");
 		newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		newFrame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, false));
+		newFrame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, true));
 		newFrame.pack();
 		newFrame.setVisible(true);
 
