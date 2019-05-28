@@ -19,17 +19,17 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 500;
+	private static int numberPoints = 200;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 5;
 	//radius of each particle.
 
-	private static double ro = 0;
+	private static double ro = 0.2;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
 		//1 = balls are hollow shells,0
@@ -42,15 +42,15 @@ public class Main {
 	//speed that the top and bottom walls "move" to accurately simulate
 	// viscous pipe flow. (ro must be >0, as rotation is necessary for viscosity.)
 
-	private static boolean[] boundaries = {true, false, false, false, false, false};
+	private static boolean[] boundaries = {false, false, false, false, false, false};
 	//array which determines boundary conditions on particle collision with the wall.
 	//false = normal wall hit physics.
 	//true = 'pipe' behavior: particles which hit wall are teleported with the
 	// same speed to the opposite wall, creating the effect of a flowing pipe.
-	//order of conditions to be set: [right, left, top, bottom, close, far]
+	//order of conditions to be set: [right, left, bottom, top, far, close]
 	// where close and far are for 3d sims only and refer to depth.
 
-	private static boolean simulateInOnly2d = true;
+	private static boolean simulateInOnly2d = false;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
 	//	3rd components of velocity and position are set to 0, and the 2nd and
 	//  3rd components of angular velocity will be set to 0. The gas will be
@@ -307,7 +307,6 @@ public class Main {
 
 			if(Dvn <= 0.000000000001){ //shut up!
 				candidates[i][3] = 99999+time;
-
 			}
 			else {
 				//compute time
@@ -365,28 +364,28 @@ public class Main {
 				//TODO: this looks ridiculous. can it be optimized?
 				if(n[0] == right[0] && boundaries[0] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{-1*dimension,p[1],p[2]});
+					event.p1.setPosition(new double[]{r - dimension,p[1],p[2]});
 				}
 
 				else if(n[0] == left[0] && boundaries[1] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{dimension,p[1],p[2]});
+					event.p1.setPosition(new double[]{dimension - r,p[1],p[2]});
 				}
 				else if(n[1] == top[1] && boundaries[2] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{p[0],-1*dimension,p[2]});
+					event.p1.setPosition(new double[]{p[0],r-dimension,p[2]});
 				}
 				else if(n[1] == bottom[1] && boundaries[3] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{p[0],dimension,p[2]});
+					event.p1.setPosition(new double[]{p[0],dimension-r,p[2]});
 				}
-				else if(n[2] == close[2] && boundaries[4] == true){
+				else if(n[2] == far[2] && boundaries[4] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{p[0],p[1],dimension});
+					event.p1.setPosition(new double[]{p[0],p[1],dimension-r});
 				}
-				else if(n[2] == bottom[2] && boundaries[5] == true){
+				else if(n[2] == close[2] && boundaries[5] == true){
 					double[] p = event.p1.getPosition();
-					event.p1.setPosition(new double[]{p[0],p[1],-1*dimension});
+					event.p1.setPosition(new double[]{p[0],p[1],r-dimension});
 				}
 
 				else{
@@ -612,6 +611,8 @@ public class Main {
 			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, false));
 			frame.pack();
 			frame.setVisible(true);
+			try{ Thread.sleep(1000); }
+			catch (Exception exc){}
 
 			//for every frame, repaint the screen and wait time.
 			for(double[][] layout : animation){
@@ -682,20 +683,33 @@ public class Main {
 		 Random random = new Random();
 
 		 for(int i = 0; i<numberPoints; i++) {
-			 space.add(new Particle());
-			 //no args in constructor ==> randomly determine all pos and v.
-			 //to use Particle constructor:
-			 // space.add(new Particle(PositionVector, velocityVector, angularVelocityVector))
-			 // usually, angularVelocity is set to {0,0,0} whether you want rotation or not.
-			 // with a ro=0, no rotation. Particles will rotate when ro > 0. (see top)
+			 //INITIALIZATION OF POINTS OCCURS HERE! YOU, THE USER, CAN DEFINE
+			 // INITIAL CONDITIONS IN THIS AREA! NICE!
 
-			 //you can modify the random velocities using the following methods:
-			 // Particle.getPosition(), Particle.setPosition(),
-			 // Particle.getVelocity(), Particle.setVelocity(),
-			 // Particle.getAngularV(), Partile.setAngularV().
+			 //Method 1: random conditions. (these DO scale with the dimensions of the chamber)
+			 space.add(new Particle());
+
+			 //Method 2: adjusted random conditions. Here, you can create a random
+			 // set of starting conditions but adjust the numbers to your liking.
+			 //the example shown simply adds a certain number to the x-velocity to
+			 // start off with a "laminar flow" ish thing.
+			 //Don't be an idiot and spawn points outside of the domain, on top of each other,
+			 // etc etc etc.
+			 /*Particle myParticle = new Particle();
+			 double[] vel = myParticle.getVelocity();
+		   double[] pos = myParticle.getPosition();
+			 double[] angVel = myParticle.getAngularV();
+			 double[] newVel = {vel[0]+2000, vel[1], vel[2]};
+			 double[] newPos = {pos[0], pos[1], pos[2]};
+			 double[] newAngVel = {angVel[0], angVel[1], angVel[2]};
+			 myParticle.setVelocity(newVel);
+			 myParticle.setPosition(newPos);
+			 myParticle.setAngularV(newAngVel);
+			 space.add(myParticle);
+			 */
 
 			 //or you can manually create initial condition using the particle constructor:
-			 // space.add(new Particle(double[] pos, double[] vel, double[] angvel));
+			 /*space.add(new Particle(double[] pos, double[] vel, double[] angvel)); */
 		 }
 
 		 for(int i=0; i<numberPoints; i++){

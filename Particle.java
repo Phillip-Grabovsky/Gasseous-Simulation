@@ -15,7 +15,7 @@ public class Particle {
     int size = Main.getDimension();
     Random random = new Random();
     double randPos1 = (random.nextDouble()*2*size)-size;
-    double randPos2 = (random.nextDouble()*2*size)-size; //shitty. gosh darn. code. yuck
+    double randPos2 = (random.nextDouble()*2*size)-size; //this is bad code. I know.
     double randPos3 = (random.nextDouble()*2*size)-size;
 
     double randVel1 = (random.nextDouble()*8*size)-4*size;
