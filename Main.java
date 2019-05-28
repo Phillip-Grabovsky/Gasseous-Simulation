@@ -174,13 +174,13 @@ public class Main {
 	public static void main(String[] args) {
 
 		//CONFIG STUFF + INITIALIZE POINTS, SPACE, AND EVENTS.
+		System.out.println("initialization");
 		if(simulateInOnly2d == true){
 			enable3dVisuals = false;
 		}
 		else{
 			velocityBoxes = 0;
 		}
-		System.out.println("initialization");
 		initialize(); //initializes both event storers and all positions & vels.
 		int numberEvents = 0;
 		addSpeeds();
