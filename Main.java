@@ -69,7 +69,7 @@ public class Main {
 	// when the full domain is cut into boxes of user-determined size above.
 	// NOTE: AS OF THE CURRENT VERSION, THIS IS ONLY AVAILABLE FOR 2D SIMULATIONS. :(
 
-	private static double interval = 0.01;
+	private static double interval = 0.005;
 	//the time interval between additions of position and velocity data to
 	// the animations. Because the simulation is EVENT BASED, it will add the
 	// frame of the first event which occurs after the next interval.
@@ -96,7 +96,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 10;
+	private static int waitTime = 5;
 	//the amount of milliseconds to wait after each frame.
 
 
