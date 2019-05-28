@@ -35,7 +35,7 @@ public class Chamber extends JPanel {
     this.enable3dVisuals = e3d;
     this.drawBox = drawBox;
     this.mode = vels;
-    if(mode == true){
+    if(mode == false){
       enable3dVisuals = false;
     }
 

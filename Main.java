@@ -19,14 +19,14 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 1000;
+	private static int numberPoints = 500;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
-	private static int dimension = 200;
+	private static int dimension = 400;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 7;
 	//radius of each particle.
 
 
@@ -36,7 +36,7 @@ public class Main {
 		//1 = balls are hollow shells,0
 		//0.2 = even distribution.
 
-	private static double stopTime = 3;
+	private static double stopTime = 5;
 	//how much time to run the simulation.
 
 	private static double wallSpeed = 0;
@@ -54,17 +54,17 @@ public class Main {
 
 
 	//section 2: animation---------------------
-	private static int velocityBoxes = 10;
+	private static int velocityBoxes = 20;
 
 	private static boolean makeAnimation = true;
 
-	private static double increment = 0.01;
+	private static double increment = 0.001;
 	//increment is ONLY used for the animation (the simulation's time between each frame)
 	//make sure it is finer than the time between collisions, or the animation will be shit.
 
 	private static boolean drawBox = true;
 
-	private static boolean enable3dVisuals = false;
+	private static boolean enable3dVisuals = true;
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
 
@@ -76,7 +76,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 5;
+	private static int waitTime = 10;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -154,16 +154,16 @@ public class Main {
 		while(time < stopTime) {
 			findNextEvent(); //finds time and nature of the next event.
 			if(time > x){
-				x+=0.001;
+				x+=0.005;
 				System.out.println(time);
 				addOneEvent();
 				addVelocityMap();
 				//System.out.println(averageXVel);
-				/*if(averageXVel < 20 && flowGoing){
+				if(averageXVel < 20 && flowGoing){
 					System.out.println("FLOW IS DONE!");
 					flowGoing = false;
 					laminarStops = time;
-				}*/
+				}
 			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
@@ -718,10 +718,10 @@ public class Main {
 
 			 double r1 = (random.nextDouble()*2*dimension)-dimension;
 			 double r2 = (random.nextDouble()*2*dimension)-dimension; //shitty. gosh darn. code. yuck
-			 //double r3 = (random.nextDouble()*2*dimension)-dimension;
+			// double r3 = (random.nextDouble()*2*dimension)-dimension;
 			 double randV1 = (random.nextDouble()*100) - 50;
-			 //double randV2 = (random.nextDouble()*40) - 20;
-			 double randx = (random.nextDouble()*100) - 50;
+			 double randV2 = (random.nextDouble()*100) - 20;
+			 //double randx = (random.nextDouble()*100) - 50;
 			 /*
 			 boolean validate = false;
 			 while(validate == false){
@@ -738,11 +738,11 @@ public class Main {
 				 }
 			 } */
 
-			 double[] randomPos = {r1,r2,0};
-			 space.add(new Particle(randomPos, new double[]{8*(300 + randV1), 8*randx, 0}, Z));
-			 double[] vortexVel = {r2,-r1,0};
+			 //double[] randomPos = {r1,r2,0};
+			 //space.add(new Particle(randomPos, new double[]{8*(300 + randV1), 8*randx, 0}, Z));
+			 //double[] vortexVel = {r2,-r1,0};
 			 //space.add(new Particle(randomPos, vortexVel, Z));
-			 //space.add(new Particle());
+			 space.add(new Particle());
 			 //no args in constructor ==> randomly determine all pos and v.
 		 }
 
