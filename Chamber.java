@@ -82,7 +82,7 @@ public class Chamber extends JPanel {
 	//The dimensions of the panel
 	public Dimension getPreferredSize() {
 
-		return new Dimension(WINDOW_SIZE, WINDOW_SIZE);
+		return new Dimension(2*WINDOW_SIZE, 2*WINDOW_SIZE);
 
 	}
 

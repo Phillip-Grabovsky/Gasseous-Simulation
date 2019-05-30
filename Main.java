@@ -19,30 +19,30 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 200;
+	private static int numberPoints = 1000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 5;
+	private static int r = 2;
 	//radius of each particle.
 
-	private static double ro = 0.2;
+	private static double ro = 1;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
-		//1 = balls are hollow shells,0
+		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 5;
+	private static double stopTime = 2;
 	//how much time to run the simulation.
 
-	private static double wallSpeed = 0;
+	private static double wallSpeed = 2000;
 	//speed that the top and bottom walls "move" to accurately simulate
 	// viscous pipe flow. (ro must be >0, as rotation is necessary for viscosity.)
 
-	private static boolean[] boundaries = {false, false, false, false, false, false};
+	private static boolean[] boundaries = {true, true, false, false, false, false};
 	//array which determines boundary conditions on particle collision with the wall.
 	//false = normal wall hit physics.
 	//true = 'pipe' behavior: particles which hit wall are teleported with the
@@ -50,7 +50,7 @@ public class Main {
 	//order of conditions to be set: [right, left, bottom, top, far, close]
 	// where close and far are for 3d sims only and refer to depth.
 
-	private static boolean simulateInOnly2d = false;
+	private static boolean simulateInOnly2d = true;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
 	//	3rd components of velocity and position are set to 0, and the 2nd and
 	//  3rd components of angular velocity will be set to 0. The gas will be
@@ -69,7 +69,7 @@ public class Main {
 	// when the full domain is cut into boxes of user-determined size above.
 	// NOTE: AS OF THE CURRENT VERSION, THIS IS ONLY AVAILABLE FOR 2D SIMULATIONS. :(
 
-	private static double interval = 0.005;
+	private static double interval = 0.01;
 	//the time interval between additions of position and velocity data to
 	// the animations. Because the simulation is EVENT BASED, it will add the
 	// frame of the first event which occurs after the next interval.
@@ -88,15 +88,11 @@ public class Main {
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
 
-	//private static int sizeChangingFactor = 8;
-	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
-	//  any size changing, set it to 0.
-
 	private static double viewerDistanceRatio = 0.75;
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 5;
+	private static int waitTime = 10;
 	//the amount of milliseconds to wait after each frame.
 
 
@@ -392,7 +388,13 @@ public class Main {
 
 					double[] p = event.p1.getPosition();
 					double[] vel = event.p1.getVelocity();
-					double[] v = {vel[0] - wallSpeed, vel[1], vel[2]};
+					double[] v;
+					if(n[1] == top[1]){
+						v = new double[]{vel[0] - wallSpeed, vel[1], vel[2]};
+					}
+					else {
+						v = new double[]{vel[0], vel[1], vel[2]};
+					}
 					double[] omg = event.p1.getAngularV();
 
 					//compute some values
@@ -403,7 +405,13 @@ public class Main {
 
 					//sets new linear velocity
 					double[] vNoShift = LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0);
-					double[] vShift = {vNoShift[0] + wallSpeed, vNoShift[1], vNoShift[2]};
+					double[] vShift;
+					if(n[1] == top[1]){
+						vShift = new double[]{vNoShift[0] + wallSpeed, vNoShift[1], vNoShift[2]};
+					}
+					else{
+						vShift = new double[]{vNoShift[0], vNoShift[1], vNoShift[2]};
+					}
 					event.p1.setVelocity( vShift );
 					//sets new angular velocity
 					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
@@ -705,8 +713,8 @@ public class Main {
 			 myParticle.setVelocity(newVel);
 			 myParticle.setPosition(newPos);
 			 myParticle.setAngularV(newAngVel);
-			 space.add(myParticle);
-			 */
+			 space.add(myParticle);*/
+
 
 			 //or you can manually create initial condition using the particle constructor:
 			 /*space.add(new Particle(double[] pos, double[] vel, double[] angvel)); */
