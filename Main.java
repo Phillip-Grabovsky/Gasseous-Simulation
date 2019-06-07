@@ -159,8 +159,6 @@ public class Main {
 	private static double[] far = {0,0,-1}; // ^
 	private static List<double[][]> velocityAnimation = new ArrayList<double[][]>();
 	private static double[][] velocityLayout;
-	private static double laminarStops;
-	private static boolean flowGoing = true;
 	private static double averageXVel;
 	private static List<Double> XVelsFile = new ArrayList<Double>();
 
