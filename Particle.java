@@ -15,21 +15,16 @@ public class Particle {
     int size = Main.getDimension();
     Random random = new Random();
     double randPos1 = (random.nextDouble()*2*size)-size;
-    double randPos2 = (random.nextDouble()*2*size)-size; //shitty. gosh darn. code. yuck
+    double randPos2 = (random.nextDouble()*2*size)-size; //this is bad code. I know.
     double randPos3 = (random.nextDouble()*2*size)-size;
 
-    double randVel1 = (random.nextDouble()*2*size)-size;
-    double randVel2 = (random.nextDouble()*2*size)-size;
-    double randVel3 = (random.nextDouble()*2*size)-size;
-
-
-    double randAngVel1 = (random.nextDouble()*2*20)-20;
-    double randAngVel2 = (random.nextDouble()*2*20)-20;
-    double randAngVel3 = (random.nextDouble()*2*20)-20;
+    double randVel1 = (random.nextDouble()*8*size)-4*size;
+    double randVel2 = (random.nextDouble()*8*size)-4*size;
+    double randVel3 = (random.nextDouble()*8*size)-4*size;
 
     this.position = new double[]{randPos1,randPos2, randPos3};
     this.velocity = new double[]{randVel1,randVel2,randVel3};
-    this.angularV = new double[]{randAngVel1,randAngVel2,randAngVel3};
+    this.angularV = new double[]{0,0,0};
   }
 
   public void FinishStructure(){

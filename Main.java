@@ -7,6 +7,7 @@ import java.lang.Math;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 public class Main {
 
@@ -18,26 +19,38 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 100;
+	private static int numberPoints = 1000;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
-	private static int dimension = 400;
+	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 10;
+	private static int r = 2;
 	//radius of each particle.
 
-	private static double ro = 0;
+	private static double ro = 1;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 50;
+	private static double stopTime = 2;
 	//how much time to run the simulation.
 
-	private static boolean simulateInOnly2d = false;
+	private static double wallSpeed = 2000;
+	//speed that the top and bottom walls "move" to accurately simulate
+	// viscous pipe flow. (ro must be >0, as rotation is necessary for viscosity.)
+
+	private static boolean[] boundaries = {true, true, false, false, false, false};
+	//array which determines boundary conditions on particle collision with the wall.
+	//false = normal wall hit physics.
+	//true = 'pipe' behavior: particles which hit wall are teleported with the
+	// same speed to the opposite wall, creating the effect of a flowing pipe.
+	//order of conditions to be set: [right, left, bottom, top, far, close]
+	// where close and far are for 3d sims only and refer to depth.
+
+	private static boolean simulateInOnly2d = true;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
 	//	3rd components of velocity and position are set to 0, and the 2nd and
 	//  3rd components of angular velocity will be set to 0. The gas will be
@@ -50,19 +63,30 @@ public class Main {
 
 
 	//section 2: animation---------------------
-	private static double increment = 0.01;
-	//increment is ONLY used for the animation (the simulation's time between each frame)
-	//make sure it is finer than the time between collisions, or the animation will be shit.
+	private static int velocityBoxes = 10;
+	//a second animation is played after the first one. this one shows a limited
+	// "vector field", showing the average velocity of particles within each box
+	// when the full domain is cut into boxes of user-determined size above.
+	// NOTE: AS OF THE CURRENT VERSION, THIS IS ONLY AVAILABLE FOR 2D SIMULATIONS. :(
+
+	private static double interval = 0.01;
+	//the time interval between additions of position and velocity data to
+	// the animations. Because the simulation is EVENT BASED, it will add the
+	// frame of the first event which occurs after the next interval.
+  //
+	// NOTE: THIS VERSION CURRENTLY CANNOT ANIMATE BETWEEN TWO EVENTS. THUS MAKE
+	// 		   SURE THAT ENOUGH COLLISIONS OCCUR PER UNIT TIME SO THAT FRAMES ARE
+	//			 ADDED IN A WAY THAT STICKS TO THE INTERVALS CLOSELY.
+
+	private static boolean makeAnimation = true;
+	//toggles whether or not to make an animation.
 
 	private static boolean drawBox = true;
+	//draw the borders of the box or not.
 
 	private static boolean enable3dVisuals = true;
 	//projects the 3d cube to the 2d screen during animation so that you can naturally
 	// look into the box. Also makes closer particles larger (this can be turned off)
-
-	//private static int sizeChangingFactor = 8;
-	//Make closer particles larger to aid in 3d visuals by this factor. If you don't want
-	//  any size changing, set it to 0.
 
 	private static double viewerDistanceRatio = 0.75;
 	//3d visualizer projection settings: the distance at which the viewer peers
@@ -76,7 +100,7 @@ public class Main {
 
 
 	//section 3: output of data---------------------
-	private static boolean outputFinalSpeeds = false;
+	private static boolean outputSpeedData = false;
 	//this outputs the final speed distribution at the end for data collection.
 	//this function is a little buggy. It is set by default to only report at the last
 	//	time step/animational increment, though this sometimes fails.
@@ -86,8 +110,17 @@ public class Main {
 	//	simulation again and hope that you're met with numbers and not chinese characters.
 	//^^I have not experimented much with changing the delimiters, that may change something.
 
-	private static String path = "/Users/phillip/Documents/Projects/Gasseous-Simulation/speeds.txt";
+	private static String path = "Macintosh HD 2/Phillip/Desktop/speeds.txt";
 	//the path for the output file of the speed data from above.
+	// this file contains the speeds of all particles regardless of direction, at
+	// every time the function addSpeeds() is called. By default this is done
+	// at the very beginning and very end of the simulation.
+
+	private static String XVelPath = "Macintosh HD 2/Phillip/Desktop/XVels.txt";
+	//the path for the output file of the speed data from above.
+	// this file contains the speeds of all particles IN THE X DIRECTION, at
+	// every time the function addSpeeds() is called. By default this is done
+	// at the very beginning and very end of the simulation.
 
 	private static String speedDelimiter = ",";
 	//separator between each speed value in the file above.
@@ -118,27 +151,53 @@ public class Main {
 	private static double[][] currentLayout = new double[numberPoints][5]; //a single frame of the animation.
 	private static List<Event> recompute = new ArrayList<Event>(); //events to be recomputed. part of the time-saving structure.
 	private static ArrayList<double[]> speeds = new ArrayList<double[]>();
+	private static double[] right = {1,0,0}; //wall identifiers in 3d
+	private static double[] left = {-1,0,0}; // ^
+	private static double[] top = {0,1,0}; // ^
+	private static double[] bottom = {0,-1,0}; //^
+	private static double[] close = {0,0,1}; // ^
+	private static double[] far = {0,0,-1}; // ^
+	private static List<double[][]> velocityAnimation = new ArrayList<double[][]>();
+	private static double[][] velocityLayout;
+	private static double averageXVel;
+	private static List<Double> XVelsFile = new ArrayList<Double>();
 
+
+
+	//MAIN METHOD. DOES EVERYTHING. THE REST OF THE FILE IS HELPER FUNCTIONS!
 	public static void main(String[] args) {
+
+		//CONFIG STUFF + INITIALIZE POINTS, SPACE, AND EVENTS.
+		System.out.println("initialization");
 		if(simulateInOnly2d == true){
 			enable3dVisuals = false;
 		}
-
-		System.out.println("initialization");
+		else{
+			velocityBoxes = 0;
+		}
 		initialize(); //initializes both event storers and all positions & vels.
+		int numberEvents = 0;
+		addSpeeds();
+		double nextTime = 0;
 		System.out.println("init done.");
 
-		double numberIncrements = 0;
+		//MAIN SIMULATION LOOP. ADDS FRAMES TO ANIMATION, CALCULATES EVENTS.
 		while(time < stopTime) {
-			System.out.println("time: " + time);
 			findNextEvent(); //finds time and nature of the next event.
-			addToAnimation(event);		//create a smooth series of frames leading up to this event, and add it to the animation.
+			if(time > nextTime){
+				nextTime+=interval;
+				System.out.println(time);
+				addOneEvent();
+				addVelocityMap();
+			}
 			handleEvent(); //goes to that time. resets positions and velocities.
 			time = event.time; //update time
+			numberEvents++;
 		}
 
-		animate(); //display an animation of our simulation!
-
+		//SIMULATION DONE, ANIMATION MADE. DISPLAY/OUTPUT OUR DATA
+		animate(); //display an animation of our simulation! And output all speed data!
+		animateVelocities(); //display the animation of the velocity vector field!
 	}
 
 	public static void findNextEvent() {
@@ -190,7 +249,11 @@ public class Main {
 			p.type1.time = update[3];
 
 		}
+		int smallWall = numberPoints - 1;
 		Arrays.sort(wallList);
+		while(wallList[smallWall].time < 0){
+			smallWall--;
+		}
 
 		//now, after updating the walls, update the collisions!
 		for(Event e : recompute){
@@ -202,13 +265,13 @@ public class Main {
 		Event smallestCollide = collideMatrix[1][0];
     for(int i = 0; i < numberPoints; i++) {
       for(int j = 0; j < i; j++) {
-        if(collideMatrix[i][j].time < smallestCollide.time) {
+        if(collideMatrix[i][j].time < smallestCollide.time && collideMatrix[i][j].time - time > 0) {
 					smallestCollide = collideMatrix[i][j];
         }
       }
     }
 		//smallest walltime
-		Event smallestWall = wallList[numberPoints-1];
+		Event smallestWall = wallList[smallWall];
 
 		//pick sooner one of wall or interparticle!
 		if(smallestCollide.time < smallestWall.time) {
@@ -238,7 +301,6 @@ public class Main {
 
 			if(Dvn <= 0.000000000001){ //shut up!
 				candidates[i][3] = 99999+time;
-
 			}
 			else {
 				//compute time
@@ -292,21 +354,67 @@ public class Main {
 			//VELOCITIES
 			if(event.type == 1) { //updates linear and angular vels for wall hits.
 				double[] n = event.wallNormal;
-				double[] p = event.p1.getPosition();
-				double[] v = event.p1.getVelocity();
-				double[] omg = event.p1.getAngularV();
+				//Deal with boundary conditions here.
+				//TODO: this looks ridiculous. can it be optimized?
+				if(n[0] == right[0] && boundaries[0] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{r - dimension,p[1],p[2]});
+				}
 
-				//compute some values
-				double Dvn = DP(v,n);
-				double[] Cnomg = CP(n,omg);
-				double[] Cnv = CP(n,v);
-				double Dnomg = DP(n,omg);
+				else if(n[0] == left[0] && boundaries[1] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{dimension - r,p[1],p[2]});
+				}
+				else if(n[1] == top[1] && boundaries[2] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],r-dimension,p[2]});
+				}
+				else if(n[1] == bottom[1] && boundaries[3] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],dimension-r,p[2]});
+				}
+				else if(n[2] == far[2] && boundaries[4] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],p[1],dimension-r});
+				}
+				else if(n[2] == close[2] && boundaries[5] == true){
+					double[] p = event.p1.getPosition();
+					event.p1.setPosition(new double[]{p[0],p[1],r-dimension});
+				}
 
-				//sets new linear velocity
-				event.p1.setVelocity( LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0) );
+				else{
 
-				//sets new angular velocity
-				event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
+					double[] p = event.p1.getPosition();
+					double[] vel = event.p1.getVelocity();
+					double[] v;
+					if(n[1] == top[1]){
+						v = new double[]{vel[0] - wallSpeed, vel[1], vel[2]};
+					}
+					else {
+						v = new double[]{vel[0], vel[1], vel[2]};
+					}
+					double[] omg = event.p1.getAngularV();
+
+					//compute some values
+					double Dvn = DP(v,n);
+					double[] Cnomg = CP(n,omg);
+					double[] Cnv = CP(n,v);
+					double Dnomg = DP(n,omg);
+
+					//sets new linear velocity
+					double[] vNoShift = LC(v,n,Cnomg,Z,   (1-ro)/(1+ro), (-2*Dvn)/(ro+1), (2*ro*r)/(ro+1), 0);
+					double[] vShift;
+					if(n[1] == top[1]){
+						vShift = new double[]{vNoShift[0] + wallSpeed, vNoShift[1], vNoShift[2]};
+					}
+					else{
+						vShift = new double[]{vNoShift[0], vNoShift[1], vNoShift[2]};
+					}
+					event.p1.setVelocity( vShift );
+					//sets new angular velocity
+					event.p1.setAngularV( LC(omg,n,Cnv,Z,   (ro-1)/(ro+1), (2*Dnomg)/(ro+1), (-2)/(r*(ro+1)), 0) );
+
+				}
 
 			}
 			else{
@@ -352,85 +460,165 @@ public class Main {
 
 	}
 
-	public static void addToAnimation(Event e) {
-		double totalTime = e.time - time;
-		boolean reportSpeeds;
-		if(outputFinalSpeeds == false){
-			reportSpeeds = false;
-		}
-		else if(e.time > time - 2*increment){
-			reportSpeeds = true;
-		}
-		else{
-			reportSpeeds = false;
-		}
-		int numberLayouts = (int)Math.round(totalTime / increment);
+	public static void addOneEvent(){
 		double[][] newLayout;
 		double[] newSpeed = new double[numberPoints];
+		newLayout = new double[numberPoints][5];
+		for(int j=0; j<spaceArray.length; j++) {
+			///3D Visuals!! Woohoo!
+			double newX;
+			double newY;
+			if(enable3dVisuals == true){
+				double[] XYZ =  spaceArray[j].getPosition();
+				double X = XYZ[0];
+				double Y = XYZ[1];
+				double noShiftZ = XYZ[2];
+				double Z = dimension - noShiftZ;
 
-		for(int i = 0; i<numberLayouts; i++){
-			newLayout = new double[numberPoints][5];
-			for(int j=0; j<spaceArray.length; j++) {
+				//we first project the X.
+				double D = -1 * X;
+				double V = dimension * 2 * viewerDistanceRatio;
+				double shiftX = (D * Z)/(Z + V);
+				newX = X + shiftX;
 
-				///3D Visuals!! Woohoo!
-				double newX;
-				double newY;
-				if(enable3dVisuals == true){
-					double[] XYZ =  spaceArray[j].whereAt(i*increment);
-					double X = XYZ[0];
-					double Y = XYZ[1];
-					double noShiftZ = XYZ[2];
-					double Z = dimension - noShiftZ;
+				D +=r;
+				double edgeshiftX = (D * Z)/(Z+V);
 
-					//we first project the X.
-					double D = -1 * X;
-					double V = dimension * 2 * viewerDistanceRatio;
-					double shiftX = (D * Z)/(Z + V);
-					newX = X + shiftX;
+				//now we do same for Y.
+				D = -1 * Y;
+				double shiftY = (D * Z)/(Z + V);
+				newY = Y + shiftY;
+				D += r;
+				double edgeshiftY = (D*Z)/(Z+V);
 
-					D +=r;
-					double edgeshiftX = (D * Z)/(Z+V);
-
-					//now we do same for Y.
-					D = -1 * Y;
-					double shiftY = (D * Z)/(Z + V);
-					newY = Y + shiftY;
-					D += r;
-					double edgeshiftY = (D*Z)/(Z+V);
-
-					double newxrad = shiftX + r - edgeshiftX;
-					double newyrad = shiftY + r - edgeshiftY;
+				double newxrad = shiftX + r - edgeshiftX;
+				double newyrad = shiftY + r - edgeshiftY;
 
 
-					newLayout[j] = new double[]{newX, newY, noShiftZ, newxrad, newyrad};
+				newLayout[j] = new double[]{newX, newY, noShiftZ, newxrad, newyrad};
 
-				}
-				else{
-					double [] pos = spaceArray[j].whereAt(i*increment);
-					newLayout[j] = new double[]{pos[0],pos[1],pos[2],r,r};
-				}
-
-				newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
 			}
-			animation.add(newLayout);
-			if(reportSpeeds == true){
-				speeds.add(newSpeed);
+			else{
+				double [] pos = spaceArray[j].getPosition();
+				newLayout[j] = new double[]{pos[0],pos[1],pos[2],r,r};
 			}
 		}
- 	}
+		animation.add(newLayout);
+	}
+
+
+
+	public static void addVelocityMap(){
+		if(velocityBoxes == 0){
+			return;
+		}
+		int size = (dimension*2)/velocityBoxes;
+		double[][] newVelocityMap = new double[velocityBoxes * velocityBoxes][3];
+		//go through each point, updating average velocity in whatever box it's in!
+		double totalXVel = 0;
+		for(Particle p : spaceArray){
+			double[] pos = p.getPosition();
+			int[] Box = {-1,-1};
+
+			//find which box it's in!
+			for(int i = 0; i<2; i++){
+				boolean boxFound = false;
+				while(boxFound == false){
+					Box[i]++;
+					/*System.out.println("Box num: " + Box[i]);
+					System.out.println("Range (" + ((Box[i]*size) - dimension) + ", " + (((Box[i]+1)*size)-dimension) +")");
+					System.out.println("Pos: " + pos[i]);*/
+					if(pos[i] >= (Box[i]*size) - dimension && pos[i] <= ((Box[i]+1)*size)-dimension ){
+						//System.out.println("BOXFOUND! " + i);
+						boxFound = true;
+					}
+					if(pos[i] < -1 * dimension){
+						boxFound = true;
+					}
+				}
+			}
+
+			int index = velocityBoxes*Box[1] + Box[0];
+			while(index >= newVelocityMap.length){
+				index -= velocityBoxes;
+			}
+			double[] vel = p.getVelocity();
+			double pointsAveraged = newVelocityMap[index][0];
+			newVelocityMap[index][1] = (newVelocityMap[index][1] * pointsAveraged + vel[0])/(pointsAveraged+1);
+			newVelocityMap[index][2] = (newVelocityMap[index][2] * pointsAveraged + vel[1])/(pointsAveraged+1);
+
+			newVelocityMap[index][0]++;
+			totalXVel += vel[0];
+		}
+		averageXVel = totalXVel / numberPoints;
+		XVelsFile.add(averageXVel);
+		velocityAnimation.add(newVelocityMap);
+
+	}
+
+	public static void addSpeeds() {
+		double[] newSpeed = new double[numberPoints];
+		for(int j=0; j<spaceArray.length; j++) {
+			newSpeed[j] = Math.sqrt(squareMag(spaceArray[j].getVelocity())); //shshhh don't tell!
+		}
+		speeds.add(newSpeed);
+	}
+
 
 		public static double[][] getCurrentLayout(){
 			return currentLayout; //returns the current frame of animation to display
 		}
+		public static double[][] getVelocityLayout(){
+			return velocityLayout;
+		}
+
+
 
 		public static void animate(){
+			if(outputSpeedData == true){
+				try {
+					FileOutputStream fos = new FileOutputStream(path);
+					DataOutputStream dos = new DataOutputStream(fos);
+					for(double[] f : speeds){
+						for(double speed : f){
+							dos.writeUTF(Double.toString(speed));
+							dos.writeUTF(speedDelimiter);
+						}
+						dos.writeUTF(frameDelimiter);
+					}
+					dos.close();
+				}
+				catch (IOException e) {
+					System.out.println("IOException : " + e);
+				}
+
+				try {
+					FileOutputStream fos = new FileOutputStream(XVelPath);
+					DataOutputStream dos = new DataOutputStream(fos);
+					for(Double f : XVelsFile){
+						dos.writeUTF(Double.toString(f));
+						dos.writeUTF(speedDelimiter);
+					}
+					dos.close();
+				}
+				catch (IOException e) {
+					System.out.println("IOException : " + e);
+				}
+
+			}
+
+			if(makeAnimation == false){
+				return;
+			}
 			currentLayout = animation.get(0);
 			//setup animation stuff
 			JFrame frame = new JFrame("Simulation");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox));
+			frame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, false));
 			frame.pack();
 			frame.setVisible(true);
+			try{ Thread.sleep(1000); }
+			catch (Exception exc){}
 
 			//for every frame, repaint the screen and wait time.
 			for(double[][] layout : animation){
@@ -442,27 +630,32 @@ public class Main {
 				catch (Exception exc){}
 
 			}
+	}
 
-		if(outputFinalSpeeds == true){
-			try {
-				FileOutputStream fos = new FileOutputStream(path);
-				DataOutputStream dos = new DataOutputStream(fos);
-				for(double[] f : speeds){
-					for(double speed : f){
-						dos.writeUTF(Double.toString(speed));
-						dos.writeUTF(speedDelimiter);
-					}
-					dos.writeUTF(frameDelimiter);
-				}
-		  	dos.close();
-			}
-			catch (IOException e) {
-				System.out.println("IOException : " + e);
-			}
+	public static void animateVelocities(){
+		if(velocityBoxes == 0){
+			return;
+		}
+		velocityLayout = velocityAnimation.get(0);
+		//setup animation stuff
+		JFrame newFrame = new JFrame("Velocities");
+		newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		newFrame.add(new Chamber(r, dimension, enable3dVisuals, viewerDistanceRatio, drawBox, true));
+		newFrame.pack();
+		newFrame.setVisible(true);
+
+		//for every frame, repaint the screen and wait time.
+		for(double[][] layout : velocityAnimation){
+			velocityLayout = layout; //update which frame of animation to show
+
+			newFrame.repaint();
+
+			try{ Thread.sleep(waitTime); }
+			catch (Exception exc){}
 
 		}
 
-	}
+}
 
 
 		public static double squareMag(double[] v){
@@ -493,10 +686,36 @@ public class Main {
 
 	 public static void initialize(){
 		 spaceArray = new Particle[numberPoints];
+		 Random random = new Random();
 
 		 for(int i = 0; i<numberPoints; i++) {
+			 //INITIALIZATION OF POINTS OCCURS HERE! YOU, THE USER, CAN DEFINE
+			 // INITIAL CONDITIONS IN THIS AREA! NICE!
+
+			 //Method 1: random conditions. (these DO scale with the dimensions of the chamber)
 			 space.add(new Particle());
-			 //no constructor: simply creates random particles.
+
+			 //Method 2: adjusted random conditions. Here, you can create a random
+			 // set of starting conditions but adjust the numbers to your liking.
+			 //the example shown simply adds a certain number to the x-velocity to
+			 // start off with a "laminar flow" ish thing.
+			 //Don't be an idiot and spawn points outside of the domain, on top of each other,
+			 // etc etc etc.
+			 /*Particle myParticle = new Particle();
+			 double[] vel = myParticle.getVelocity();
+		   double[] pos = myParticle.getPosition();
+			 double[] angVel = myParticle.getAngularV();
+			 double[] newVel = {vel[0]+2000, vel[1], vel[2]};
+			 double[] newPos = {pos[0], pos[1], pos[2]};
+			 double[] newAngVel = {angVel[0], angVel[1], angVel[2]};
+			 myParticle.setVelocity(newVel);
+			 myParticle.setPosition(newPos);
+			 myParticle.setAngularV(newAngVel);
+			 space.add(myParticle);*/
+
+
+			 //or you can manually create initial condition using the particle constructor:
+			 /*space.add(new Particle(double[] pos, double[] vel, double[] angvel)); */
 		 }
 
 		 for(int i=0; i<numberPoints; i++){
@@ -520,15 +739,13 @@ public class Main {
 			 for(Particle p : spaceArray) {
 				 double[] v = p.getVelocity();
 				 double[] P = p.getPosition();
-				 double[] av = p.getAngularV();
 
 				 double[] newV = {v[0], v[1], 0};
-				 double[] newP = {P[1], P[1], 0};
-				 double[] newAV = {av[0], 0, 0};
+				 double[] newP = {P[0], P[1], 0};
 
 				 p.setVelocity(newV);
-				 p.setPosition(newV);
-				 p.setAngularV(newAV);
+				 p.setPosition(newP);
+				 p.setAngularV(Z);
 			 }
 		 }
 	 }
