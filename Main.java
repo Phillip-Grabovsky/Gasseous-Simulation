@@ -19,30 +19,30 @@ public class Main {
 	//	"initialize" function on the bottom.
 
 	//section 1: simulation---------------------
-	private static int numberPoints = 1000;
+	private static int numberPoints = 500;
 	//Make sure that this corresponds with the # of points you make in the
 	// initialize function at the bottom.
 
 	private static int dimension = 200;
 	//distance from origin to each wall. origin is in the very center of the box.
 
-	private static int r = 2;
+	private static int r = 5;
 	//radius of each particle.
 
-	private static double ro = 1;
+	private static double ro = 0.2;
 	//mass distribution inside particles. ranges 0-1, inclusive.
 		//0 = all mass at centerpoint (rotations dont happen here),
 		//1 = balls are hollow shells,
 		//0.2 = even distribution.
 
-	private static double stopTime = 2;
+	private static double stopTime = 20;
 	//how much time to run the simulation.
 
-	private static double wallSpeed = 2000;
+	private static double wallSpeed = 0;
 	//speed that the top and bottom walls "move" to accurately simulate
 	// viscous pipe flow. (ro must be >0, as rotation is necessary for viscosity.)
 
-	private static boolean[] boundaries = {true, true, false, false, false, false};
+	private static boolean[] boundaries = {false, false, false, false, false, false};
 	//array which determines boundary conditions on particle collision with the wall.
 	//false = normal wall hit physics.
 	//true = 'pipe' behavior: particles which hit wall are teleported with the
@@ -50,7 +50,7 @@ public class Main {
 	//order of conditions to be set: [right, left, bottom, top, far, close]
 	// where close and far are for 3d sims only and refer to depth.
 
-	private static boolean simulateInOnly2d = true;
+	private static boolean simulateInOnly2d = false;
 	//simulates a 2d gas as opposed to a 3d gas. After points are initialzed,
 	//	3rd components of velocity and position are set to 0, and the 2nd and
 	//  3rd components of angular velocity will be set to 0. The gas will be
@@ -92,7 +92,7 @@ public class Main {
 	//3d visualizer projection settings: the distance at which the viewer peers
 	// into the simulation cube, in terms of number of sidelengths of the simulation cube.
 
-	private static int waitTime = 10;
+	private static int waitTime = 15;
 	//the amount of milliseconds to wait after each frame.
 
 
